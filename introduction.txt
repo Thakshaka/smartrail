@@ -1,0 +1,167 @@
+1. Introduction
+Public transport is an integral part of everyday travel in Sri Lanka, with millions relying on
+trains, buses, and other transportation services. The National Transport Commission (NTC)
+states that about 1.5 million people travel by train every day, and more than 90% of passengers
+travel by road-based transport such as buses and private vehicles. This excessive dependence
+on road transportation has generated high traffic levels, especially in highly populated urban
+centers like Colombo. The heightened pace of private car ownership has also led to heightened
+air pollution, carbon emissions, and inefficient fuel consumption. As cities keep on growing, it
+is a necessity to make public transportation more efficient and promote a switch to rail
+transport.
+Train travel has been identified as a fast and green mode of transportation with high capacities
+to transport people that can travel with far less emission per kilometer compared to road
+transportation. Trains alleviate congestion in road traffic, improve fuel efficiency, and provide
+enhanced safety for commuters. But Sri Lanka's railway network is challenged by issues of
+uncertainty in timetabling and real-time location. Delays in trains caused by infrastructural
+constraints, operational inefficiencies, climatic conditions, and technical problems
+inconvenience commuters with longer waiting time and uncertain travel plans. More accurate
+arrival prediction of trains and real-time tracking would enable smoother commuter experience
+and attract a modal shift to rail transportation.
+To respond to these issues, Sri Lanka introduced RDMNS.LK, an online and mobile-based
+train scheduling and tracking system that offers train timetables and real-time updates
+(RDMNS.LK,2024). The RDMNS.LK system sources crowdsourced information from users
+of its mobile application, which enables the tracking of the movement of trains in real-time in
+addition to occupancy by travelers. The system improves the passenger experience as it
+provides real-time information about train positions and travel conditions. Nevertheless,
+RDMNS.LK does not utilize predictive analytics at present, i.e., it does not automatically
+generate arrival time predictions or delay alerts based on real-time conditions such as
+congestion, mechanical breakdown, or adverse weather. Incorporating predictive models using
+machine learning can enhance the accuracy of arrival times, decrease uncertainty, and increase
+railway efficiency.
+5
+Recent research has shown that machine learning has the potential to greatly improve rail
+efficiency. Numerous predictive models like k-nearest neighbors (k-NN), moving averages
+(Pongnumkul et al., 2014), Temporal Fusion Transformer (TFT) models (Pichardo Vicencio,
+2024), and Random Forest Regression (Kosolsombat & Limprasert,2017) have been employed
+in predicting train delays with growing accuracy. By integrating these cutting-edge data-driven
+technologies in Sri Lanka's rail network, arrival time predictions can be enhanced, resulting in
+better scheduling and enhanced passenger experience.
+Enhancing Sri Lanka's railway network with predictive analytics and real-time monitoring will
+not just improve railway operations but also have wider societal advantages. Promoting the
+utilization of rail over road transportation will decrease traffic congestion, environmental
+footprint, and enhance sustainable city growth. Further, an efficiently running railway system
+has the potential to improve economic productivity through effective transportation of
+individuals and commodities, enhancing labor mobility and national infrastructure (Zhang et
+al., 2019).
+With the incorporation of machine learning-based predictive analytics in the railway system of
+Sri Lanka, train timetables can be made more efficient, reliable, and commuter-friendly. This
+will allow passengers to plan their trip more assuredly, without uncertainty about travel. With
+more commuters traveling by rail than road transport, Sri Lanka's cities will experience less
+traffic congestion, lower carbon emissions, and better air quality. Lastly, a smart railway system
+will result in a green, economically successful, and sustainable society.
+2. Problem Statement
+Sri Lankan Railways depend on manual observation and fixed timetables without effective
+real-time train arrival predictions. This results in passenger dissatisfaction, operational
+inefficiencies, and low public transport confidence. This project seeks to address these
+problems by applying machine learning to provide accurate predictions of train arrival times,
+enhancing efficiency, reliability, and commuter experience.
+6
+3. Aims and Objectives
+Aim:
+To develop a real-time train tracking and arrival time prediction system for Sri Lanka using
+machine learning to improve accuracy and enhance customer satisfaction.
+Objectives:
+• To assess the effectiveness and reliability of existing railway tracking applications.
+• To identify and analyze recent technologies in railway tracking.
+• To develop machine learning models for accurate train arrival time prediction.
+4. Literature Review
+The prediction of train arrival times and real-time railway tracking has gained significant
+attention due to the need for improved passenger experience, optimized railway operations,
+and enhanced transportation efficiency. Recent research explores Machine Learning (ML)
+techniques to address these challenges, yet gaps remain in their practical implementation,
+particularly in developing countries like Sri Lanka.
+ML models have been widely used in railway systems to enhance scheduling accuracy. Vafaei
+and Yaghini (2024) propose Artificial Neural Networks (ANN), Random Forest (RF), Gradient
+Boosting Regression (GBoost), and Extreme Gradient Boosting (XGBoost) models to predict
+train arrival times. Their study, based on historical data from the Tehran-Mashhad railway,
+demonstrates that ML improves scheduling accuracy and reduces delays. However, the
+approach is heavily reliant on extensive high-quality datasets, which may not be readily
+available in developing railway networks.
+Beyond prediction models, real-time tracking has been explored to improve train monitoring.
+Zhang et al. (2019) introduce a Hidden Markov Model (HMM) for train number tracking,
+mitigating uncertainties in signaling and scheduling data. Their study highlights the
+significance of real-time information integration but does not fully address disruptions caused
+by unpredictable factors such as weather or maintenance. The challenge lies in dynamically
+updating predictions based on live data, which remains an area of further research.
+7
+The availability of railway datasets is another crucial aspect influencing ML applications.
+Pappaterra et al. (2021) review publicly available datasets for AI-driven railway applications,
+finding that while traffic planning and maintenance datasets are abundant, those related to real-
+time tracking and transport policy are scarce. This limitation constrains the development of
+generalizable ML models, especially for countries with outdated railway infrastructure.
+Despite these contributions, challenges persist in applying ML models to railway networks with
+inconsistent data collection. Vafaei and Yaghini (2024) show ML effectiveness in structured
+networks, but the applicability to Sri Lanka, with outdated infrastructure and irregular
+scheduling, remains uncertain. Furthermore, Zhang et al. (2019) emphasize real-time tracking,
+yet their model relies mainly on historical data, limiting its effectiveness in handling sudden
+disruptions. The lack of well-documented datasets, as highlighted by Pappaterra et al. (2021),
+further complicates ML model development for railway systems.
+While most studies focus on technologically advanced railway networks in developed
+countries, limited research examines how ML techniques can be adapted to smaller, less
+advanced railway systems. The integration of ML-based predictions with real-time data is
+another research gap, as most models depend on historical data rather than dynamic updates.
+Additionally, dataset scarcity remains a significant barrier, limiting collaborative research and
+practical implementation in underdeveloped railway networks.
+Building on this foundation, the proposed research aims to develop a real-time railway tracking
+and arrival time prediction system tailored to Sri Lanka’s railway network. This study applies
+ML models such as ANN, RF, GBoost, and XGBoost, extending the work of Vafaei and Yaghini
+(2024) by incorporating real-time data sources, including train location updates and track
+status, to enhance predictive accuracy.
+Furthermore, this research expands on Zhang et al. (2019) by designing a train tracking
+mechanism that dynamically updates train locations and mitigates real-time uncertainties in Sri
+Lanka’s railway system. By integrating diverse data inputs, the proposed system enhances train
+tracking and prediction accuracy in environments with frequent schedule disruptions.
+To address dataset scarcity, this current study will collect and curate a comprehensive dataset
+specific to Sri Lanka’s railway network, combining historical and real-time data. By developing
+an accessible dataset, this research contributes to future studies on railway tracking and ML
+applications in transportation.
+8
+To summarize, while ML has shown promise in railway tracking and arrival time prediction,
+critical gaps remain in real-time data integration, dataset availability, and the applicability of
+ML techniques to developing railway systems. This study seeks to bridge these gaps by
+incorporating ML techniques with live data streams to enhance prediction accuracy and railway
+efficiency in Sri Lanka.
+5. Methodology
+The methodology for the proposed research is given below.
+5.1 Study Design
+This study adheres to a structured Software Development Life Cycle (SDLC) methodology in
+designing and implementing a real-time tracking and arrival time prediction system for Sri
+Lanka Railways. The research process includes model development, system integration, and
+performance analysis.
+5.2 Machine Learning Model Development
+An appropriate machine learning model will be used to accurately predict train arrival times.
+The selected model will be trained on historical railway data in Sri Lanka and tested in real
+scenarios. Potential algorithms include:
+• Regression models (Linear Regression, Random Forest Regressor) for time series
+prediction.
+• Neural networks (LSTM, GRU) for sequential data processing.
+• Hybrid methods involving multiple ML techniques for enhanced accuracy.
+5.3 System Design and Development
+The expected system to be developed will consist of a front-end, back-end, and database. Its
+architecture is as follows:
+• Front-End: React.js will be used to create an interactive user-friendly web interface
+showing real-time train tracking and arrival prediction.
+• Back-End: Node.js will manage API requests, process data, and handle model
+predictions.
+9
+• Database: PostgreSQL will store historical train data, real-time updates, and prediction
+results.
+The project workflow and key phases are illustrated in the diagram below:
+Figure 1: Methodology
+5.4 System Integration and Testing
+The machine learning model will be integrated to the backend of the developed system to real
+time prediction. The developed system will be tested in a number of phases as mentioned
+below:
+• Unit Testing: Individual components such as data fetching, model predictions, and API
+responses will be tested.
+• Integration Testing: Communication between the front-end, back-end, and database will
+be tested.
+10
+• User Acceptance Testing (UAT): The system will be tested with Sri Lanka Railways
+operational staff and travelers to gather feedback and make improvements.
+5.5 Deployment and Evaluation
+The system will be deployed on a cloud server for scalability and accessibility. A pilot
+deployment will be conducted to assess real-world performance. The predictive accuracy of
+train arrivals will be continuously evaluated and refined by retraining the model with updated
+datasets.
+11
