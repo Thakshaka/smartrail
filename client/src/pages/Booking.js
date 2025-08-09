@@ -36,7 +36,8 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAlert } from '../contexts/AlertContext';
-import axios from 'axios';
+import { trainService } from '../services/trainService';
+import { bookingService } from '../services/bookingService';
 
 const steps = ['Select Journey', 'Passenger Details', 'Seat Selection', 'Payment', 'Confirmation'];
 
@@ -93,8 +94,8 @@ const Booking = () => {
   const loadAvailableTrains = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/trains');
-      setAvailableTrains(response.data.trains);
+      const response = await trainService.getAllTrains();
+      setAvailableTrains(response.trains || []);
     } catch (error) {
       showError('Failed to load available trains');
     } finally {
@@ -199,10 +200,10 @@ const Booking = () => {
         payment_data: paymentData
       };
 
-      const response = await axios.post('/api/bookings', bookingPayload);
-      
+      const response = await bookingService.createBooking(bookingPayload);
+
       showSuccess('Booking confirmed successfully!');
-      navigate(`/booking/${response.data.booking.id}`);
+      navigate(`/booking/${response.booking.id}`);
     } catch (error) {
       showError('Failed to create booking. Please try again.');
     } finally {
@@ -226,8 +227,8 @@ const Booking = () => {
             <Grid container spacing={3}>
               {availableTrains.map((train) => (
                 <Grid item xs={12} md={6} key={train.id}>
-                  <Card 
-                    sx={{ 
+                  <Card
+                    sx={{
                       cursor: 'pointer',
                       border: selectedTrain?.id === train.id ? 2 : 1,
                       borderColor: selectedTrain?.id === train.id ? 'primary.main' : 'grey.300'
@@ -246,7 +247,7 @@ const Booking = () => {
                         </Box>
                         <Chip label={train.type} color="primary" size="small" />
                       </Box>
-                      
+
                       <Grid container spacing={2}>
                         <Grid item xs={6}>
                           <Typography variant="body2" color="text.secondary">
@@ -265,9 +266,9 @@ const Booking = () => {
                           </Typography>
                         </Grid>
                       </Grid>
-                      
+
                       <Divider sx={{ my: 2 }} />
-                      
+
                       <Typography variant="h6" color="primary">
                         LKR {train.base_price}
                       </Typography>
@@ -285,14 +286,14 @@ const Booking = () => {
             <Typography variant="h6" gutterBottom>
               Passenger Details
             </Typography>
-            <Button 
-              variant="outlined" 
+            <Button
+              variant="outlined"
               onClick={addPassenger}
               sx={{ mb: 3 }}
             >
               Add Passenger
             </Button>
-            
+
             {bookingData.passengers.map((passenger, index) => (
               <Card key={index} sx={{ mb: 2 }}>
                 <CardContent>
@@ -300,15 +301,15 @@ const Booking = () => {
                     <Typography variant="subtitle1">
                       Passenger {index + 1}
                     </Typography>
-                    <Button 
-                      size="small" 
+                    <Button
+                      size="small"
                       color="error"
                       onClick={() => removePassenger(index)}
                     >
                       Remove
                     </Button>
                   </Box>
-                  
+
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
                       <TextField
@@ -357,7 +358,7 @@ const Booking = () => {
             <Alert severity="info" sx={{ mb: 3 }}>
               Select {bookingData.passengers.length} seat(s) for your passengers
             </Alert>
-            
+
             <Grid container spacing={2}>
               {Array.from({ length: 50 }, (_, i) => (
                 <Grid item xs={2} sm={1} key={i}>
@@ -382,7 +383,7 @@ const Booking = () => {
             <Typography variant="h6" gutterBottom>
               Payment Details
             </Typography>
-            
+
             <Grid container spacing={3}>
               <Grid item xs={12} md={8}>
                 <Card>
@@ -390,7 +391,7 @@ const Booking = () => {
                     <Typography variant="subtitle1" gutterBottom>
                       Payment Information
                     </Typography>
-                    
+
                     <Grid container spacing={2}>
                       <Grid item xs={12}>
                         <TextField
@@ -431,36 +432,36 @@ const Booking = () => {
                   </CardContent>
                 </Card>
               </Grid>
-              
+
               <Grid item xs={12} md={4}>
                 <Card>
                   <CardContent>
                     <Typography variant="subtitle1" gutterBottom>
                       Booking Summary
                     </Typography>
-                    
+
                     <List dense>
                       <ListItem>
-                        <ListItemText 
+                        <ListItemText
                           primary="Train"
                           secondary={selectedTrain?.name}
                         />
                       </ListItem>
                       <ListItem>
-                        <ListItemText 
+                        <ListItemText
                           primary="Passengers"
                           secondary={bookingData.passengers.length}
                         />
                       </ListItem>
                       <ListItem>
-                        <ListItemText 
+                        <ListItemText
                           primary="Seats"
                           secondary={bookingData.selected_seats.join(', ')}
                         />
                       </ListItem>
                       <Divider />
                       <ListItem>
-                        <ListItemText 
+                        <ListItemText
                           primary="Total Amount"
                           secondary={`LKR ${calculateTotalPrice()}`}
                         />
@@ -517,7 +518,7 @@ const Booking = () => {
       ) : (
         <Box>
           {renderStepContent(activeStep)}
-          
+
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
             <Button
               disabled={activeStep === 0}
@@ -539,4 +540,4 @@ const Booking = () => {
   );
 };
 
-export default Booking; 
+export default Booking;

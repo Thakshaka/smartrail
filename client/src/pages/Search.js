@@ -31,8 +31,9 @@ import {
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import axios from 'axios';
 import { useAlert } from '../contexts/AlertContext';
+import { stationService } from '../services/stationService';
+import { trainService } from '../services/trainService';
 
 const Search = () => {
   const [searchData, setSearchData] = useState({
@@ -57,10 +58,11 @@ const Search = () => {
   const loadStations = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/trains/stations/all');
-      setStations(response.data.stations);
+      const response = await stationService.getAllStations();
+      setStations(response.data.stations || []);
     } catch (error) {
       showError('Failed to load stations');
+      console.error('Station loading error:', error);
     } finally {
       setLoading(false);
     }
@@ -89,8 +91,8 @@ const Search = () => {
         train_type: searchData.train_type !== 'all' ? searchData.train_type : undefined
       };
 
-      const response = await axios.get('/api/trains/search', { params });
-      setSearchResults(response.data.results);
+      const response = await trainService.searchTrains(params);
+      setSearchResults(response.results || []);
     } catch (error) {
       showError('Failed to search trains');
       setSearchResults([]);
@@ -388,9 +390,9 @@ const Search = () => {
               { from: 'Colombo Fort', to: 'Jaffna' }
             ].map((route, index) => (
               <Grid item xs={12} sm={6} md={3} key={index}>
-                <Card 
-                  sx={{ 
-                    cursor: 'pointer', 
+                <Card
+                  sx={{
+                    cursor: 'pointer',
                     '&:hover': { bgcolor: 'primary.light', color: 'white' },
                     transition: 'all 0.2s'
                   }}
@@ -418,4 +420,4 @@ const Search = () => {
   );
 };
 
-export default Search; 
+export default Search;

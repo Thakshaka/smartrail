@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import { authService } from '../services/authService';
 
 const AuthContext = createContext();
 
@@ -18,9 +18,8 @@ export const AuthProvider = ({ children }) => {
 
   // Check if user is logged in on app start
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = authService.getToken();
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       checkAuthStatus();
     } else {
       setLoading(false);
@@ -30,12 +29,11 @@ export const AuthProvider = ({ children }) => {
   // Check authentication status
   const checkAuthStatus = async () => {
     try {
-      const response = await axios.get('/api/auth/profile');
-      setUser(response.data.user);
+      const response = await authService.getProfile();
+      setUser(response.user);
     } catch (error) {
       console.error('Auth check failed:', error);
-      localStorage.removeItem('token');
-      delete axios.defaults.headers.common['Authorization'];
+      authService.logout();
     } finally {
       setLoading(false);
     }
@@ -45,20 +43,11 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       setError(null);
-      const response = await axios.post('/api/auth/login', {
-        email,
-        password
-      });
+      const response = await authService.login({ email, password });
 
-      const { token, user } = response.data;
-      
-      // Store token
-      localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
       // Set user
-      setUser(user);
-      
+      setUser(response.user);
+
       return { success: true };
     } catch (error) {
       const message = error.response?.data?.message || 'Login failed';
@@ -71,17 +60,11 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       setError(null);
-      const response = await axios.post('/api/auth/register', userData);
+      const response = await authService.register(userData);
 
-      const { token, user } = response.data;
-      
-      // Store token
-      localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
       // Set user
-      setUser(user);
-      
+      setUser(response.user);
+
       return { success: true };
     } catch (error) {
       const message = error.response?.data?.message || 'Registration failed';
@@ -93,15 +76,14 @@ export const AuthProvider = ({ children }) => {
   // Logout function
   const logout = async () => {
     try {
-      await axios.post('/api/auth/logout');
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      // Clear local storage and state
-      localStorage.removeItem('token');
-      delete axios.defaults.headers.common['Authorization'];
+      // Use auth service logout
+      authService.logout();
+
+      // Clear user
       setUser(null);
       setError(null);
+    } catch (error) {
+      console.error('Logout error:', error);
     }
   };
 
@@ -109,8 +91,8 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (profileData) => {
     try {
       setError(null);
-      const response = await axios.put('/api/auth/profile', profileData);
-      setUser(response.data.user);
+      const response = await authService.updateProfile(profileData);
+      setUser(response.user);
       return { success: true };
     } catch (error) {
       const message = error.response?.data?.message || 'Profile update failed';
@@ -123,10 +105,7 @@ export const AuthProvider = ({ children }) => {
   const changePassword = async (currentPassword, newPassword) => {
     try {
       setError(null);
-      await axios.put('/api/auth/change-password', {
-        current_password: currentPassword,
-        new_password: newPassword
-      });
+      await authService.changePassword(currentPassword, newPassword);
       return { success: true };
     } catch (error) {
       const message = error.response?.data?.message || 'Password change failed';
@@ -158,4 +137,4 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-}; 
+};

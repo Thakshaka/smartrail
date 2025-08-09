@@ -8,8 +8,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-// Import the background image
-import homeBackground from '../assets/home-srilanka-train.jpg';
+// Use a gradient background instead of image for now
+// import homeBackground from '../assets/home-srilanka-train.jpg';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -62,12 +62,9 @@ const Home = () => {
   return (
     <Box>
       {/* Hero Section */}
-      <Paper sx={{ 
+      <Paper sx={{
         position: 'relative',
-        backgroundImage: `url(${homeBackground})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
+        background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 50%, #64b5f6 100%)',
         minHeight: '80vh',
         display: 'flex',
         alignItems: 'center',
@@ -78,7 +75,7 @@ const Home = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+          backgroundColor: 'rgba(0, 0, 0, 0.2)',
           zIndex: 1
         }
       }}>
@@ -91,19 +88,19 @@ const Home = () => {
               Real-time train tracking and intelligent booking system for Sri Lanka Railways
             </Typography>
             <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap">
-              <Button 
-                variant="contained" 
+              <Button
+                variant="contained"
                 size="large"
                 onClick={() => navigate('/search')}
                 sx={{ minWidth: 150 }}
               >
                 Search Trains
               </Button>
-              <Button 
-                variant="outlined" 
+              <Button
+                variant="outlined"
                 size="large"
                 onClick={() => navigate('/tracking')}
-                sx={{ 
+                sx={{
                   minWidth: 150,
                   color: 'white',
                   borderColor: 'white',
@@ -146,16 +143,16 @@ const Home = () => {
         <Typography variant="h6" textAlign="center" color="text.secondary" sx={{ mb: 6 }}>
           Experience the future of railway travel in Sri Lanka
         </Typography>
-        
+
         <Grid container spacing={4}>
           {features.map((feature, index) => (
             <Grid item xs={12} sm={6} md={4} key={index}>
               <Card sx={{ height: '100%', p: 3 }}>
                 <Box sx={{ textAlign: 'center', mb: 2 }}>
-                  <Box sx={{ 
-                    display: 'inline-flex', 
-                    p: 2, 
-                    borderRadius: '50%', 
+                  <Box sx={{
+                    display: 'inline-flex',
+                    p: 2,
+                    borderRadius: '50%',
                     bgcolor: 'primary.main',
                     color: 'white',
                     mb: 2
@@ -176,8 +173,8 @@ const Home = () => {
       </Container>
 
       {/* Call to Action */}
-      <Paper sx={{ 
-        bgcolor: 'primary.main', 
+      <Paper sx={{
+        bgcolor: 'primary.main',
         color: 'white',
         py: 6
       }}>
@@ -190,11 +187,11 @@ const Home = () => {
               Join thousands of passengers who trust SmartRail for their daily commute
             </Typography>
             <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap">
-              <Button 
-                variant="contained" 
+              <Button
+                variant="contained"
                 size="large"
                 onClick={() => navigate('/register')}
-                sx={{ 
+                sx={{
                   minWidth: 150,
                   bgcolor: 'white',
                   color: 'primary.main',
@@ -205,11 +202,11 @@ const Home = () => {
               >
                 Get Started
               </Button>
-              <Button 
-                variant="outlined" 
+              <Button
+                variant="outlined"
                 size="large"
                 onClick={() => navigate('/contact')}
-                sx={{ 
+                sx={{
                   minWidth: 150,
                   color: 'white',
                   borderColor: 'white',
@@ -233,10 +230,10 @@ const Home = () => {
         </Typography>
         <Box sx={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 1, mt: 3 }}>
           {techStack.map((tech, index) => (
-            <Chip 
+            <Chip
               key={index}
-              label={tech} 
-              variant="outlined" 
+              label={tech}
+              variant="outlined"
               sx={{ m: 0.5 }}
             />
           ))}
@@ -246,4 +243,4 @@ const Home = () => {
   );
 };
 
-export default Home; 
+export default Home;

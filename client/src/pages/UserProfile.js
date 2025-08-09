@@ -39,7 +39,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useAlert } from '../contexts/AlertContext';
-import axios from 'axios';
+import { bookingService } from '../services/bookingService';
 
 const TabPanel = ({ children, value, index, ...other }) => (
   <div
@@ -99,8 +99,8 @@ const UserProfile = () => {
 
   const loadUserBookings = async () => {
     try {
-      const response = await axios.get('/api/bookings');
-      setUserBookings(response.data.bookings);
+      const response = await bookingService.getUserBookings();
+      setUserBookings(response.bookings || []);
     } catch (error) {
       console.error('Failed to load user bookings:', error);
     }
@@ -149,7 +149,7 @@ const UserProfile = () => {
 
   const handleSaveProfile = async () => {
     setLoading(true);
-    
+
     try {
       const result = await updateProfile(profileData);
       if (result.success) {
@@ -184,7 +184,7 @@ const UserProfile = () => {
     }
 
     setLoading(true);
-    
+
     try {
       const result = await changePassword(passwordData.current_password, passwordData.new_password);
       if (result.success) {
@@ -248,10 +248,10 @@ const UserProfile = () => {
           <Card>
             <CardContent sx={{ textAlign: 'center' }}>
               <Avatar
-                sx={{ 
-                  width: 100, 
-                  height: 100, 
-                  mx: 'auto', 
+                sx={{
+                  width: 100,
+                  height: 100,
+                  mx: 'auto',
                   mb: 2,
                   bgcolor: 'primary.main',
                   fontSize: '2rem'
@@ -259,22 +259,22 @@ const UserProfile = () => {
               >
                 {user.first_name?.[0]}{user.last_name?.[0]}
               </Avatar>
-              
+
               <Typography variant="h6" gutterBottom>
                 {user.first_name} {user.last_name}
               </Typography>
-              
+
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 {user.email}
               </Typography>
-              
-              <Chip 
-                label="Active Member" 
-                color="success" 
-                size="small" 
+
+              <Chip
+                label="Active Member"
+                color="success"
+                size="small"
                 sx={{ mt: 1 }}
               />
-              
+
               <Box sx={{ mt: 3 }}>
                 <Typography variant="body2" color="text.secondary">
                   Member since {formatDate(user.created_at)}
@@ -379,7 +379,7 @@ const UserProfile = () => {
                 <Typography variant="h6" gutterBottom>
                   My Bookings
                 </Typography>
-                
+
                 {userBookings.length === 0 ? (
                   <Alert severity="info">
                     No bookings found. Start by searching for trains and making a booking.
@@ -411,7 +411,7 @@ const UserProfile = () => {
                 <Typography variant="h6" gutterBottom>
                   Change Password
                 </Typography>
-                
+
                 <Grid container spacing={3}>
                   <Grid item xs={12}>
                     <TextField
@@ -459,7 +459,7 @@ const UserProfile = () => {
                 <Typography variant="h6" gutterBottom>
                   Notification Preferences
                 </Typography>
-                
+
                 <List>
                   <ListItem>
                     <ListItemIcon>
@@ -513,4 +513,4 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile; 
+export default UserProfile;

@@ -33,9 +33,11 @@ import {
   Directions,
   Timeline
 } from '@mui/icons-material';
-import axios from 'axios';
 import { useSocket } from '../contexts/SocketContext';
 import { useAlert } from '../contexts/AlertContext';
+import { trainService } from '../services/trainService';
+import { trackingService } from '../services/trackingService';
+import { predictionService } from '../services/predictionService';
 
 const Tracking = () => {
   const [selectedTrain, setSelectedTrain] = useState('');
@@ -84,8 +86,8 @@ const Tracking = () => {
   const loadTrains = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/trains');
-      setTrains(response.data.trains);
+      const response = await trainService.getAllTrains();
+      setTrains(response.trains || []);
     } catch (error) {
       showError('Failed to load trains');
     } finally {
@@ -95,8 +97,8 @@ const Tracking = () => {
 
   const loadTrackingData = async (trainId) => {
     try {
-      const response = await axios.get(`/api/tracking/${trainId}`);
-      setTrackingData(response.data.current_location);
+      const response = await trackingService.getTrainTracking(trainId);
+      setTrackingData(response.current_location);
     } catch (error) {
       console.error('Failed to load tracking data:', error);
     }
@@ -104,8 +106,8 @@ const Tracking = () => {
 
   const loadPredictions = async (trainId) => {
     try {
-      const response = await axios.get(`/api/predictions/${trainId}`);
-      setPredictions(response.data.predictions);
+      const response = await predictionService.getTrainPredictions(trainId);
+      setPredictions(response.predictions || []);
     } catch (error) {
       console.error('Failed to load predictions:', error);
     }
@@ -113,8 +115,8 @@ const Tracking = () => {
 
   const loadTrackingHistory = async (trainId) => {
     try {
-      const response = await axios.get(`/api/tracking/${trainId}?hours=6`);
-      setTrackingHistory(response.data.tracking_data);
+      const response = await trackingService.getTrackingHistory(trainId, new Date().toISOString().split('T')[0]);
+      setTrackingHistory(response.tracking_data || []);
     } catch (error) {
       console.error('Failed to load tracking history:', error);
     }
@@ -207,7 +209,7 @@ const Tracking = () => {
                 <Typography variant="h6" component="h2" gutterBottom>
                   Current Location
                 </Typography>
-                
+
                 {trackingData ? (
                   <Box>
                     <Grid container spacing={2}>
@@ -240,16 +242,16 @@ const Tracking = () => {
                           Direction
                         </Typography>
                         <Typography variant="body1" fontWeight="medium">
-                          {trackingData.direction_degrees ? 
-                            `${trackingData.direction_degrees}° (${getDirectionText(trackingData.direction_degrees)})` : 
+                          {trackingData.direction_degrees ?
+                            `${trackingData.direction_degrees}° (${getDirectionText(trackingData.direction_degrees)})` :
                             'N/A'
                           }
                         </Typography>
                       </Grid>
                     </Grid>
-                    
+
                     <Divider sx={{ my: 2 }} />
-                    
+
                     <Typography variant="body2" color="text.secondary">
                       Last Updated: {trackingData.timestamp ? formatTime(trackingData.timestamp) : 'N/A'}
                     </Typography>
@@ -270,7 +272,7 @@ const Tracking = () => {
                 <Typography variant="h6" component="h2" gutterBottom>
                   Arrival Predictions
                 </Typography>
-                
+
                 {predictions.length > 0 ? (
                   <List dense>
                     {predictions.map((prediction, index) => (
@@ -306,7 +308,7 @@ const Tracking = () => {
                 <Typography variant="h6" component="h2" gutterBottom>
                   Tracking History (Last 6 Hours)
                 </Typography>
-                
+
                 {trackingHistory.length > 0 ? (
                   <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
                     <List dense>
@@ -381,4 +383,4 @@ const Tracking = () => {
   );
 };
 
-export default Tracking; 
+export default Tracking;

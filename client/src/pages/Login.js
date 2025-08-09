@@ -15,6 +15,7 @@ import { Visibility, VisibilityOff, Email, Lock } from '@mui/icons-material';
 import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useAlert } from '../contexts/AlertContext';
+import { authService } from '../services/authService';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -57,7 +58,7 @@ const Login = () => {
       ...prev,
       [name]: value
     }));
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
@@ -69,16 +70,16 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setLoading(true);
-    
+
     try {
       const result = await login(formData.email, formData.password);
-      
+
       if (result.success) {
         navigate(from, { replace: true });
       } else {
@@ -230,4 +231,4 @@ const Login = () => {
   );
 };
 
-export default Login; 
+export default Login;

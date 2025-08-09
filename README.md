@@ -1,227 +1,302 @@
 # SmartRail - Sri Lanka Railway Management System
 
-A comprehensive real-time train tracking and arrival time prediction system for Sri Lanka Railways, featuring machine learning-based predictions, ticket reservations, and platform alerts.
+A comprehensive railway management system for Sri Lanka featuring real-time train tracking, ML-based arrival predictions, and online booking capabilities.
 
-## 🚆 Features
+## Features
 
-### Core Features
-- **Real-time Railway Tracking**: Live train location monitoring
-- **Arrival Time Prediction**: ML-based arrival time predictions using historical data
-- **Ticket Reservation System**: Complete booking and payment system
-- **Platform Alert System**: Real-time notifications for delays and updates
+### 🚆 Real-time Train Tracking
+- Live GPS tracking of trains
+- Interactive map visualization
+- Station-to-station progress monitoring
+- Real-time location updates via WebSocket
 
-### Additional Features
-- **User Authentication**: Secure login and registration system
-- **Search & Filter**: Advanced train search functionality
-- **User Profile Management**: Personal booking history and preferences
-- **Payment Integration**: Secure payment processing
-- **Contact Support**: Customer service integration
+### 🤖 ML-based Predictions
+- Arrival time predictions using machine learning
+- Weather and traffic pattern analysis
+- Historical data-driven insights
+- Confidence scoring for predictions
 
-## 🛠️ Technology Stack
+### 🎫 Online Booking System
+- User registration and authentication
+- Train search and booking
+- Seat selection and payment integration
+- Booking management and cancellation
+
+### 📱 Modern Web Interface
+- Responsive design for all devices
+- Real-time notifications
+- Interactive dashboards
+- User-friendly booking flow
+
+## Technology Stack
 
 ### Frontend
-- **React.js** - Modern UI framework
-- **Material-UI** - Component library for consistent design
-- **Socket.io Client** - Real-time updates
-- **Axios** - HTTP client for API calls
+- **React 18** - Modern UI framework
+- **Material-UI** - Component library
+- **Socket.io Client** - Real-time communication
+- **React Router** - Navigation
+- **Axios** - HTTP client
 
 ### Backend
-- **Node.js** - Server runtime
+- **Node.js** - Runtime environment
 - **Express.js** - Web framework
 - **Socket.io** - Real-time communication
-- **JWT** - Authentication
-
-### Database
 - **PostgreSQL** - Primary database
-- **Redis** - Caching and session storage
+- **Redis** - Caching and sessions
 
 ### Machine Learning
-- **Python** - ML model development
-- **Scikit-learn** - ML algorithms
-- **TensorFlow/PyTorch** - Deep learning models
+- **Python/Flask** - ML service
+- **scikit-learn** - ML algorithms
+- **TensorFlow** - Deep learning
+- **pandas/numpy** - Data processing
 
-## 📋 Prerequisites
+### DevOps
+- **Docker** - Containerization
+- **Docker Compose** - Multi-container orchestration
+- **Nginx** - Reverse proxy and load balancing
 
-- Node.js (v16 or higher)
-- PostgreSQL (v12 or higher)
-- Python (v3.8 or higher)
-- npm or yarn
+## Getting Started
 
-## 🚀 Installation
+### Prerequisites
+- Node.js 16+ and npm
+- Python 3.8+
+- PostgreSQL 12+
+- Redis (optional, for caching)
+- Docker and Docker Compose (for containerized deployment)
 
-1. **Clone the repository**
+### Quick Setup
+
+1. **Clone and setup the project**
    ```bash
    git clone https://github.com/your-username/smartrail.git
    cd smartrail
-   ```
-
-2. **Install dependencies**
-   ```bash
+   
+   # Install all dependencies
    npm run install-all
+   
+   # Copy environment configuration
+   cp env.example .env
    ```
 
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
-
-4. **Set up database**
+2. **Database Setup**
    ```bash
    # Create PostgreSQL database
    createdb smartrail_db
    
-   # Run migrations
+   # Run migrations and seed data
    npm run db:migrate
+   npm run db:seed
    ```
 
-5. **Start the development server**
+3. **Start Development Environment**
    ```bash
+   # Start all services (frontend, backend, ML service)
    npm run dev
    ```
 
-## 📁 Project Structure
+   This will start:
+   - **Frontend**: http://localhost:3000
+   - **Backend API**: http://localhost:5000
+   - **ML Service**: http://localhost:8000
+
+### Docker Deployment
+
+For production deployment using Docker:
+
+```bash
+# Build and start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+## System Architecture
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   React Client  │    │  Express Server │    │   ML Service    │
+│   (Port 3000)   │◄──►│   (Port 5000)   │◄──►│   (Port 8000)   │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         │              ┌─────────────────┐              │
+         │              │   PostgreSQL    │              │
+         └──────────────►│    Database     │◄─────────────┘
+                        └─────────────────┘
+                                 │
+                        ┌─────────────────┐
+                        │      Redis      │
+                        │     Cache       │
+                        └─────────────────┘
+```
+
+## API Documentation
+
+### Authentication Endpoints
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+- `GET /api/auth/profile` - Get user profile
+- `PUT /api/auth/profile` - Update user profile
+
+### Train Endpoints
+- `GET /api/trains` - Get all trains
+- `GET /api/trains/search` - Search trains
+- `GET /api/trains/:id` - Get specific train
+- `GET /api/trains/:id/schedule` - Get train schedule
+
+### Booking Endpoints
+- `POST /api/bookings` - Create booking
+- `GET /api/bookings/my-bookings` - Get user bookings
+- `PUT /api/bookings/:id/cancel` - Cancel booking
+
+### Tracking Endpoints
+- `GET /api/tracking/live` - Get live train locations
+- `GET /api/tracking/train/:id` - Get train tracking data
+
+### Prediction Endpoints
+- `GET /api/predictions/train/:trainId/station/:stationId` - Get arrival prediction
+- `GET /api/predictions/accuracy/metrics` - Get prediction accuracy
+
+## Project Structure
 
 ```
 smartrail/
 ├── client/                 # React frontend
-│   ├── public/
 │   ├── src/
-│   │   ├── components/    # Reusable components
+│   │   ├── components/     # Reusable components
 │   │   ├── pages/         # Page components
+│   │   ├── contexts/      # React contexts
 │   │   ├── services/      # API services
-│   │   ├── utils/         # Utility functions
-│   │   └── styles/        # CSS styles
-│   └── package.json
-├── server/                 # Node.js backend
-│   ├── controllers/       # Route controllers
-│   ├── models/           # Database models
+│   │   └── utils/         # Utility functions
+│   ├── public/            # Static assets
+│   ├── Dockerfile         # Client container config
+│   └── nginx.conf         # Nginx configuration
+├── server/                # Node.js backend
 │   ├── routes/           # API routes
-│   ├── middleware/       # Custom middleware
+│   ├── models/           # Database models
+│   ├── middleware/       # Express middleware
 │   ├── services/         # Business logic
-│   └── utils/            # Utility functions
-├── ml/                   # Python ML models
-│   ├── models/           # Trained models
-│   ├── data/             # Dataset
-│   └── scripts/          # Training scripts
-├── docs/                 # Documentation
-└── screenshots/          # UI screenshots
+│   ├── utils/            # Utility functions
+│   ├── scripts/          # Database scripts
+│   └── Dockerfile        # Server container config
+├── ml/                   # Python ML service
+│   ├── models/           # ML models
+│   ├── utils/            # ML utilities
+│   ├── scripts/          # Training scripts
+│   ├── data/             # Training data
+│   ├── requirements.txt  # Python dependencies
+│   └── Dockerfile        # ML service container config
+├── docker-compose.yml    # Multi-container orchestration
+├── package.json          # Root package configuration
+└── .env                  # Environment variables
 ```
 
-## 🔧 Configuration
+## Key Features Implemented
 
-### Environment Variables
+### ✅ Complete System Components
+- **Frontend**: Full React application with all pages and components
+- **Backend**: Complete Express.js API with all routes and middleware
+- **ML Service**: Python Flask service with prediction models
+- **Database**: PostgreSQL with complete schema and migrations
+- **Real-time**: Socket.io integration for live updates
+- **Authentication**: JWT-based user authentication
+- **Containerization**: Docker setup for all services
 
-Create a `.env` file in the root directory:
+### ✅ Core Functionality
+- User registration and login
+- Train search and booking
+- Real-time train tracking
+- ML-based arrival predictions
+- Booking management
+- Admin dashboard
+- Payment integration ready
+- Responsive design
 
-```env
-# Server Configuration
+### ✅ Production Ready
+- Environment configuration
+- Database migrations and seeding
+- Error handling and logging
+- Security middleware
+- Docker containerization
+- Health checks
+- API documentation
+
+## Available Scripts
+
+```bash
+# Development
+npm run dev              # Start all services in development
+npm run client:dev       # Start only frontend
+npm run server:dev       # Start only backend
+npm run ml:dev          # Start only ML service
+
+# Production
+npm start               # Start all services in production
+npm run build          # Build frontend for production
+
+# Database
+npm run db:migrate     # Run database migrations
+npm run db:seed        # Seed database with initial data
+
+# Installation
+npm run install-all    # Install all dependencies
+npm run setup         # Complete setup (install + migrate + seed)
+
+# Testing
+npm test              # Run all tests
+npm run test:client   # Run frontend tests
+npm run test:server   # Run backend tests
+
+# ML Model
+npm run ml:train      # Train ML model
+```
+
+## Environment Configuration
+
+Key environment variables in `.env`:
+
+```bash
+# Server
 PORT=5000
 NODE_ENV=development
+CLIENT_URL=http://localhost:3000
 
 # Database
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=smartrail_db
-DB_USER=your_username
-DB_PASSWORD=your_password
+DB_USER=postgres
+DB_PASSWORD=password
 
-# JWT Secret
-JWT_SECRET=your_jwt_secret
+# JWT
+JWT_SECRET=your_super_secret_jwt_key
 
 # ML Service
 ML_SERVICE_URL=http://localhost:8000
-
-# Payment Gateway
-PAYMENT_API_KEY=your_payment_api_key
+ML_SERVICE_API_KEY=your_ml_api_key
 ```
 
-## 🚆 API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/logout` - User logout
-
-### Trains
-- `GET /api/trains` - Get all trains
-- `GET /api/trains/:id` - Get specific train
-- `GET /api/trains/search` - Search trains
-
-### Tracking
-- `GET /api/tracking/live` - Get live train locations
-- `GET /api/tracking/:trainId` - Get specific train tracking
-
-### Bookings
-- `POST /api/bookings` - Create booking
-- `GET /api/bookings/:id` - Get booking details
-- `PUT /api/bookings/:id` - Update booking
-
-### Predictions
-- `GET /api/predictions/:trainId` - Get arrival predictions
-- `POST /api/predictions/update` - Update prediction model
-
-## 🤖 Machine Learning Models
-
-The system uses several ML models for arrival time prediction:
-
-- **Random Forest Regression** - Base prediction model
-- **LSTM Networks** - Sequential data processing
-- **Gradient Boosting** - Enhanced accuracy
-- **Ensemble Methods** - Combined predictions
-
-## 📊 Database Schema
-
-### Core Tables
-- `users` - User accounts
-- `trains` - Train information
-- `stations` - Station data
-- `routes` - Route definitions
-- `bookings` - Ticket bookings
-- `tracking_data` - Real-time tracking
-- `predictions` - ML predictions
-
-## 🧪 Testing
-
-```bash
-# Run backend tests
-npm run test:server
-
-# Run frontend tests
-npm run test:client
-
-# Run all tests
-npm test
-```
-
-## 📈 Performance
-
-- **Response Time**: < 200ms for API calls
-- **Real-time Updates**: < 100ms latency
-- **Prediction Accuracy**: > 85% for arrival times
-- **Uptime**: 99.9% availability
-
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 📞 Support
+## Support
 
-For support and questions:
-- Email: support@smartrail.lk
-- Documentation: [docs.smartrail.lk](https://docs.smartrail.lk)
-- Issues: [GitHub Issues](https://github.com/your-username/smartrail/issues)
+For support, email support@smartrail.lk or create an issue on GitHub.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
-- Sri Lanka Railways for collaboration
-- Research team for ML model development
-- Open source community for tools and libraries
+- Sri Lanka Railways for domain expertise
+- OpenStreetMap for mapping data
+- Weather API providers for weather data
