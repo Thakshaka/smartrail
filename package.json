@@ -1,0 +1,55 @@
+{
+  "name": "smartrail",
+  "version": "1.0.0",
+  "description": "Sri Lanka Railway Management System - Real-time tracking and ML-based arrival predictions",
+  "main": "server/app.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\" \"npm run ml:dev\"",
+    "start": "concurrently \"npm run server:start\" \"npm run client:start\"",
+    "server:dev": "cd server && npm run dev",
+    "server:start": "cd server && npm start",
+    "client:dev": "cd client && npm start",
+    "client:start": "cd client && npm run build && serve -s build -l 3000",
+    "client:build": "cd client && npm run build",
+    "ml:dev": "cd ml && python app.py",
+    "ml:train": "cd ml && python scripts/train_model.py",
+    "install-all": "npm install && cd client && npm install && cd ../server && npm install && cd ../ml && pip install -r requirements.txt",
+    "db:migrate": "cd server && npm run db:migrate",
+    "db:seed": "cd server && npm run db:seed",
+    "test": "npm run test:client && npm run test:server",
+    "test:client": "cd client && npm test -- --coverage --watchAll=false",
+    "test:server": "cd server && npm test",
+    "lint": "npm run lint:client && npm run lint:server",
+    "lint:client": "cd client && npm run lint",
+    "lint:server": "cd server && npm run lint",
+    "build": "npm run client:build",
+    "setup": "npm run install-all && cp env.example .env && npm run db:migrate && npm run db:seed"
+  },
+  "keywords": [
+    "railway",
+    "tracking",
+    "machine-learning",
+    "sri-lanka",
+    "real-time",
+    "predictions",
+    "booking"
+  ],
+  "author": "SmartRail Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "serve": "^14.2.1"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/smartrail.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/smartrail/issues"
+  },
+  "homepage": "https://github.com/your-username/smartrail#readme"
+}
