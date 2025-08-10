@@ -215,17 +215,6 @@ const Login = () => {
             </Typography>
           </Box>
         </Box>
-
-        {/* Demo Credentials */}
-        <Box sx={{ mt: 4, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
-          <Typography variant="body2" color="text.secondary" gutterBottom>
-            <strong>Demo Credentials:</strong>
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
-            Email: demo@smartrail.lk<br />
-            Password: demo123
-          </Typography>
-        </Box>
       </Paper>
     </Box>
   );

@@ -225,23 +225,6 @@ const Home = () => {
           </Box>
         </Container>
       </Paper>
-
-      {/* Technology Stack */}
-      <Container maxWidth="lg" sx={{ py: 6 }}>
-        <Typography variant="h4" component="h2" textAlign="center" gutterBottom>
-          Built with Modern Technology
-        </Typography>
-        <Box sx={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 1, mt: 3 }}>
-          {techStack.map((tech, index) => (
-            <Chip
-              key={index}
-              label={tech}
-              variant="outlined"
-              sx={{ m: 0.5 }}
-            />
-          ))}
-        </Box>
-      </Container>
     </Box>
   );
 };
