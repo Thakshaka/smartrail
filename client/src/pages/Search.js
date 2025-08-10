@@ -114,11 +114,16 @@ const Search = () => {
   };
 
   const formatTime = (time) => {
-    return new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    });
+    if (!time) return 'N/A';
+    try {
+      return new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch (error) {
+      return time; // Return original time if formatting fails
+    }
   };
 
   const getTrainTypeColor = (type) => {
@@ -305,15 +310,15 @@ const Search = () => {
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                         <Box>
                           <Typography variant="h6" component="h3" gutterBottom>
-                            {train.train_name}
+                            {train.train_name || 'Unknown Train'}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
-                            Train #{train.train_number}
+                            Train #{train.train_number || 'N/A'}
                           </Typography>
                         </Box>
                         <Chip
-                          label={train.train_type}
-                          color={getTrainTypeColor(train.train_type)}
+                          label={train.train_type || 'Express'}
+                          color={getTrainTypeColor(train.train_type || 'Express')}
                           size="small"
                         />
                       </Box>
@@ -347,7 +352,7 @@ const Search = () => {
 
                       <Box sx={{ mt: 2 }}>
                         <Typography variant="body2" color="text.secondary" gutterBottom>
-                          Route: {train.origin_station} → {train.destination_station}
+                          Route: {train.origin_station || 'Origin'} → {train.destination_station || 'Destination'}
                         </Typography>
                         {train.distance_km && (
                           <Typography variant="body2" color="text.secondary">

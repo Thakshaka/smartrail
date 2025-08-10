@@ -35,9 +35,9 @@ import {
   FilterList,
   Refresh
 } from '@mui/icons-material';
-import axios from 'axios';
 import { useSocket } from '../contexts/SocketContext';
 import { useAlert } from '../contexts/AlertContext';
+import { alertService } from '../services/alertService';
 
 const Alerts = () => {
   const [alerts, setAlerts] = useState([]);
@@ -74,10 +74,15 @@ const Alerts = () => {
   const loadAlerts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/alerts');
-      setAlerts(response.data.alerts);
+      const response = await alertService.getAllAlerts({
+        type: filters.type !== 'all' ? filters.type : undefined,
+        severity: filters.severity !== 'all' ? filters.severity : undefined
+      });
+      setAlerts(response.data?.alerts || []);
     } catch (error) {
-      showError('Failed to load alerts');
+      console.error('Failed to load alerts:', error);
+      showError('Failed to load alerts. Please try again.');
+      setAlerts([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -90,16 +95,49 @@ const Alerts = () => {
     }));
   };
 
+  const handleMarkAsRead = async (alertId) => {
+    try {
+      await alertService.markAsRead(alertId);
+      setAlerts(prev => prev.map(alert =>
+        alert.id === alertId ? { ...alert, isRead: true } : alert
+      ));
+      showSuccess('Alert marked as read');
+    } catch (error) {
+      console.error('Failed to mark alert as read:', error);
+      showError('Failed to mark alert as read');
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await alertService.markAllAsRead();
+      setAlerts(prev => prev.map(alert => ({ ...alert, isRead: true })));
+      showSuccess('All alerts marked as read');
+    } catch (error) {
+      console.error('Failed to mark all alerts as read:', error);
+      showError('Failed to mark all alerts as read');
+    }
+  };
+
+  const handleDismissAlert = async (alertId) => {
+    try {
+      await alertService.dismissAlert(alertId);
+      setAlerts(prev => prev.filter(alert => alert.id !== alertId));
+      showSuccess('Alert dismissed');
+    } catch (error) {
+      console.error('Failed to dismiss alert:', error);
+      showError('Failed to dismiss alert');
+    }
+  };
+
   const handleClearAll = () => {
     clearAlerts();
     setAlerts([]);
     showSuccess('All alerts cleared');
   };
 
-  const handleRemoveAlert = (alertId) => {
-    removeAlert(alertId);
-    setAlerts(prev => prev.filter(alert => alert.id !== alertId));
-    showSuccess('Alert removed');
+  const handleRemoveAlert = async (alertId) => {
+    await handleDismissAlert(alertId);
   };
 
   const getSeverityIcon = (severity) => {
@@ -217,6 +255,15 @@ const Alerts = () => {
               </Button>
               <Button
                 variant="outlined"
+                color="primary"
+                startIcon={<Notifications />}
+                onClick={handleMarkAllAsRead}
+                disabled={loading || alerts.filter(a => !a.isRead).length === 0}
+              >
+                Mark All Read
+              </Button>
+              <Button
+                variant="outlined"
                 color="secondary"
                 startIcon={<Clear />}
                 onClick={handleClearAll}
@@ -293,7 +340,11 @@ const Alerts = () => {
         <Grid container spacing={3}>
           {filteredAlerts.map((alert) => (
             <Grid item xs={12} key={alert.id}>
-              <Card>
+              <Card sx={{
+                backgroundColor: alert.isRead ? 'background.paper' : 'action.hover',
+                border: alert.isRead ? 'none' : '1px solid',
+                borderColor: alert.isRead ? 'transparent' : 'primary.light'
+              }}>
                 <CardContent>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -323,14 +374,27 @@ const Alerts = () => {
                         </Box>
                       </Box>
                     </Box>
-                    <Tooltip title="Remove Alert">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleRemoveAlert(alert.id)}
-                      >
-                        <Clear />
-                      </IconButton>
-                    </Tooltip>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      {!alert.isRead && (
+                        <Tooltip title="Mark as Read">
+                          <IconButton
+                            size="small"
+                            onClick={() => handleMarkAsRead(alert.id)}
+                            color="primary"
+                          >
+                            <Notifications />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      <Tooltip title="Remove Alert">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleRemoveAlert(alert.id)}
+                        >
+                          <Clear />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
                   </Box>
 
                   <Typography variant="body2" color="text.secondary" paragraph>
@@ -339,7 +403,7 @@ const Alerts = () => {
 
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="caption" color="text.secondary">
-                      {formatTime(alert.created_at)}
+                      {formatTime(alert.timestamp)}
                     </Typography>
                     {alert.expires_at && (
                       <Typography variant="caption" color="text.secondary">

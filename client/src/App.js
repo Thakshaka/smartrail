@@ -17,6 +17,7 @@ import Alerts from './pages/Alerts';
 import UserProfile from './pages/UserProfile';
 import BookingView from './pages/BookingView';
 import Contact from './pages/Contact';
+import AdminDashboard from './pages/AdminDashboard';
 
 // Import components
 import Layout from './components/Layout';
@@ -144,15 +145,23 @@ function App() {
                       </ProtectedRoute>
                     } 
                   />
-                  <Route 
-                    path="/booking/:id" 
+                  <Route
+                    path="/booking/:id"
                     element={
                       <ProtectedRoute>
                         <BookingView />
                       </ProtectedRoute>
-                    } 
+                    }
                   />
-                  
+                  <Route
+                    path="/admin"
+                    element={
+                      <ProtectedRoute>
+                        <AdminDashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+
                   {/* Catch all route */}
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>

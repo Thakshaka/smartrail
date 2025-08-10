@@ -17,6 +17,8 @@ const trackingRoutes = require('./routes/tracking');
 const bookingRoutes = require('./routes/bookings');
 const predictionRoutes = require('./routes/predictions');
 const stationRoutes = require('./routes/stations');
+const alertRoutes = require('./routes/alerts');
+const adminRoutes = require('./routes/admin');
 
 // Import middleware
 const errorHandler = require('./middleware/errorHandler');
@@ -80,6 +82,8 @@ app.use('/api/tracking', trackingRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/predictions', predictionRoutes);
 app.use('/api/stations', stationRoutes);
+app.use('/api/alerts', alertRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {

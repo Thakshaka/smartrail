@@ -11,25 +11,26 @@ class User {
     this.lastName = userData.last_name;
     this.phone = userData.phone;
     this.dateOfBirth = userData.date_of_birth;
+    this.role = userData.role || 'user'; // Default to 'user', can be 'admin'
     this.createdAt = userData.created_at;
     this.updatedAt = userData.updated_at;
   }
 
   // Create a new user
   static async create(userData) {
-    const { email, password, firstName, lastName, phone, dateOfBirth } = userData;
-    
+    const { email, password, firstName, lastName, phone, dateOfBirth, role = 'user' } = userData;
+
     // Hash password
     const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    
+
     const result = await query(
-      `INSERT INTO users (email, password, first_name, last_name, phone, date_of_birth)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING id, email, first_name, last_name, phone, date_of_birth, created_at`,
-      [email, hashedPassword, firstName, lastName, phone, dateOfBirth]
+      `INSERT INTO users (email, password, first_name, last_name, phone, date_of_birth, role)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING id, email, first_name, last_name, phone, date_of_birth, role, created_at`,
+      [email, hashedPassword, firstName, lastName, phone, dateOfBirth, role]
     );
-    
+
     return new User(result.rows[0]);
   }
 
@@ -61,13 +62,19 @@ class User {
   // Generate JWT token
   generateToken() {
     return jwt.sign(
-      { 
-        id: this.id, 
-        email: this.email 
+      {
+        id: this.id,
+        email: this.email,
+        role: this.role
       },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
+  }
+
+  // Check if user is admin
+  isAdmin() {
+    return this.role === 'admin';
   }
 
   // Update user profile

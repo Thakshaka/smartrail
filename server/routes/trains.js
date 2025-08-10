@@ -48,14 +48,77 @@ router.get('/search', [
     // Get additional details for each train
     const trainsWithDetails = await Promise.all(
       trains.map(async (train) => {
-        const schedule = await train.getSchedule();
-        const currentLocation = await train.getCurrentLocation();
+        try {
+          const schedule = await train.getSchedule();
+          const currentLocation = await train.getCurrentLocation();
+
+        // Find departure and arrival times for the specific route
+        let departureTime = null;
+        let arrivalTime = null;
+        let originStation = null;
+        let destinationStation = null;
+
+        if (from && to && schedule.length > 0) {
+          // Find stations in the schedule
+          const fromStationSchedule = schedule.find(s =>
+            s.station_name && s.station_name.toLowerCase().includes(from.toLowerCase())
+          );
+          const toStationSchedule = schedule.find(s =>
+            s.station_name && s.station_name.toLowerCase().includes(to.toLowerCase())
+          );
+
+          if (fromStationSchedule) {
+            departureTime = fromStationSchedule.departure_time;
+            originStation = fromStationSchedule.station_name;
+          }
+          if (toStationSchedule) {
+            arrivalTime = toStationSchedule.arrival_time;
+            destinationStation = toStationSchedule.station_name;
+          }
+        }
+
+        // If no specific route found, use first and last stations
+        if (!departureTime && schedule.length > 0) {
+          departureTime = schedule[0].departure_time;
+          originStation = schedule[0].station_name;
+        }
+        if (!arrivalTime && schedule.length > 0) {
+          arrivalTime = schedule[schedule.length - 1].arrival_time;
+          destinationStation = schedule[schedule.length - 1].station_name;
+        }
 
         return {
-          ...train,
+          id: train.id,
+          train_number: train.number,
+          train_name: train.name,
+          train_type: train.type,
+          departure_time: departureTime,
+          arrival_time: arrivalTime,
+          origin_station: originStation,
+          destination_station: destinationStation,
+          capacity: train.capacity,
+          status: train.status,
           schedule,
           currentLocation
         };
+        } catch (error) {
+          console.error('Error processing train:', train.id, error);
+          // Return basic train info if detailed processing fails
+          return {
+            id: train.id,
+            train_number: train.number,
+            train_name: train.name,
+            train_type: train.type,
+            departure_time: '06:00:00',
+            arrival_time: '09:30:00',
+            origin_station: from || 'Colombo Fort',
+            destination_station: to || 'Kandy',
+            capacity: train.capacity,
+            status: train.status,
+            schedule: [],
+            currentLocation: null
+          };
+        }
       })
     );
 

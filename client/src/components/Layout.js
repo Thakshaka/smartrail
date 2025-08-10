@@ -28,7 +28,8 @@ import {
   BookOnline,
   ContactSupport,
   Logout,
-  Settings
+  Settings,
+  AdminPanelSettings
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -75,7 +76,10 @@ const Layout = ({ children }) => {
       { text: 'Book Tickets', path: '/booking', icon: <BookOnline /> },
       { text: 'Track Trains', path: '/tracking', icon: <Train /> },
       { text: 'Alerts', path: '/alerts', icon: <Notifications /> },
-      { text: 'Contact', path: '/contact', icon: <ContactSupport /> }
+      { text: 'Contact', path: '/contact', icon: <ContactSupport /> },
+      ...(user?.role === 'admin' ? [
+        { text: 'Admin Dashboard', path: '/admin', icon: <AdminPanelSettings /> }
+      ] : [])
     ] : [
       { text: 'Contact', path: '/contact', icon: <ContactSupport /> }
     ])
