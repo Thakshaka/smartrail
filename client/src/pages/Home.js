@@ -8,8 +8,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-// Use a gradient background instead of image for now
-// import homeBackground from '../assets/home-srilanka-train.jpg';
+// Import Sri Lankan train background image
+import srilankanTrainBackground from '../assets/srilankan-train.jpg';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -64,7 +64,10 @@ const Home = () => {
       {/* Hero Section */}
       <Paper sx={{
         position: 'relative',
-        background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 50%, #64b5f6 100%)',
+        backgroundImage: `linear-gradient(135deg, rgba(25, 118, 210, 0.8) 0%, rgba(66, 165, 245, 0.7) 50%, rgba(100, 181, 246, 0.6) 100%), url(${srilankanTrainBackground})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
         minHeight: '80vh',
         display: 'flex',
         alignItems: 'center',
@@ -75,7 +78,7 @@ const Home = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.2)',
+          backgroundColor: 'rgba(0, 0, 0, 0.3)',
           zIndex: 1
         }
       }}>

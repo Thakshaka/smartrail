@@ -10,7 +10,7 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const trains = await Train.findAll();
-    
+
     res.json({
       success: true,
       data: {
@@ -37,7 +37,7 @@ router.get('/search', [
 ], async (req, res) => {
   try {
     const { from, to, date, type } = req.query;
-    
+
     const trains = await Train.search({
       fromStation: from,
       toStation: to,
@@ -50,7 +50,7 @@ router.get('/search', [
       trains.map(async (train) => {
         const schedule = await train.getSchedule();
         const currentLocation = await train.getCurrentLocation();
-        
+
         return {
           ...train,
           schedule,
@@ -81,7 +81,7 @@ router.get('/search', [
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const train = await Train.findById(id);
     if (!train) {
       return res.status(404).json({
@@ -120,7 +120,7 @@ router.get('/:id', async (req, res) => {
 router.get('/number/:number', async (req, res) => {
   try {
     const { number } = req.params;
-    
+
     const train = await Train.findByNumber(number);
     if (!train) {
       return res.status(404).json({
@@ -159,7 +159,7 @@ router.get('/number/:number', async (req, res) => {
 router.get('/:id/schedule', async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const train = await Train.findById(id);
     if (!train) {
       return res.status(404).json({
@@ -240,18 +240,71 @@ router.get('/routes/:fromStationId/:toStationId', async (req, res) => {
 function calculateDuration(departureTime, arrivalTime) {
   const departure = new Date(`1970-01-01T${departureTime}`);
   const arrival = new Date(`1970-01-01T${arrivalTime}`);
-  
+
   let duration = arrival - departure;
-  
+
   // Handle overnight journeys
   if (duration < 0) {
     duration += 24 * 60 * 60 * 1000; // Add 24 hours
   }
-  
+
   const hours = Math.floor(duration / (1000 * 60 * 60));
   const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
-  
+
   return `${hours}h ${minutes}m`;
 }
+
+// Temporary endpoint to fix route data
+router.post('/fix-routes', async (req, res) => {
+  try {
+    const { query } = require('../config/database');
+
+    // Get route and station IDs
+    const mainLineResult = await query('SELECT id FROM routes WHERE name = $1', ['Main Line']);
+    const routeId = mainLineResult.rows[0]?.id;
+
+    const colomboResult = await query('SELECT id FROM stations WHERE name ILIKE $1', ['%Colombo%']);
+    const kandyResult = await query('SELECT id FROM stations WHERE name ILIKE $1', ['%Kandy%']);
+
+    const colomboId = colomboResult.rows[0]?.id;
+    const kandyId = kandyResult.rows[0]?.id;
+
+    if (routeId && colomboId && kandyId) {
+      // Clear existing route stations
+      await query('DELETE FROM route_stations WHERE route_id = $1', [routeId]);
+
+      // Add route stations for both directions
+      await query(`
+        INSERT INTO route_stations (route_id, station_id, order_index, arrival_time, departure_time)
+        VALUES
+        ($1, $2, 1, NULL, '06:00:00'),
+        ($1, $3, 2, '09:30:00', '09:45:00'),
+        ($1, $2, 3, '13:00:00', NULL)
+      `, [routeId, colomboId, kandyId]);
+
+      res.json({
+        success: true,
+        message: 'Route stations fixed successfully',
+        data: {
+          routeId,
+          colomboId,
+          kandyId
+        }
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: 'Could not find required route or stations'
+      });
+    }
+
+  } catch (error) {
+    logger.error('Fix routes error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
 
 module.exports = router;

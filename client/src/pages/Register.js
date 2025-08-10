@@ -112,8 +112,8 @@ const Register = () => {
     
     try {
       const result = await register({
-        first_name: formData.first_name.trim(),
-        last_name: formData.last_name.trim(),
+        firstName: formData.first_name.trim(),
+        lastName: formData.last_name.trim(),
         email: formData.email.toLowerCase(),
         phone: formData.phone,
         password: formData.password
