@@ -31,7 +31,9 @@ router.post('/', auth, [
     const { trainId, fromStationId, toStationId, travelDate, passengers, classType } = req.body;
 
     // Validate train exists
+    console.log('Looking for train with ID:', trainId);
     const train = await Train.findById(trainId);
+    console.log('Found train:', train);
     if (!train) {
       return res.status(404).json({
         success: false,
@@ -51,9 +53,13 @@ router.post('/', auth, [
     }
 
     // Get route information
+    console.log('Getting schedule for train:', train.id);
     const schedule = await train.getSchedule();
+    console.log('Train schedule:', schedule);
     const fromStationSchedule = schedule.find(s => s.station_id == fromStationId);
     const toStationSchedule = schedule.find(s => s.station_id == toStationId);
+    console.log('From station schedule:', fromStationSchedule);
+    console.log('To station schedule:', toStationSchedule);
 
     if (!fromStationSchedule || !toStationSchedule) {
       return res.status(400).json({
@@ -62,11 +68,36 @@ router.post('/', auth, [
       });
     }
 
-    // Calculate pricing
-    const basePrice = this.calculatePrice(classType, fromStationSchedule, toStationSchedule);
+    // Calculate pricing based on class type
+    let basePrice = 1500; // Default Second Class price
+    switch (classType) {
+      case 'first':
+        basePrice = 2500;
+        break;
+      case 'second':
+        basePrice = 1500;
+        break;
+      case 'third':
+        basePrice = 800;
+        break;
+      default:
+        basePrice = 1500;
+    }
     const totalAmount = basePrice * passengers.length;
 
     // Create booking
+    console.log('Creating booking with data:', {
+      userId: req.user.id,
+      trainId,
+      fromStationId,
+      toStationId,
+      travelDate,
+      departureTime: fromStationSchedule.departure_time,
+      arrivalTime: toStationSchedule.arrival_time,
+      passengers,
+      totalAmount,
+      classType
+    });
     const booking = await Booking.create({
       userId: req.user.id,
       trainId,
@@ -79,6 +110,7 @@ router.post('/', auth, [
       totalAmount,
       classType
     });
+    console.log('Booking created:', booking);
 
     // Send booking confirmation via socket
     socketService.sendBookingUpdate(req.user.id, booking);
@@ -92,10 +124,12 @@ router.post('/', auth, [
     });
 
   } catch (error) {
+    console.error('Booking creation error:', error);
     logger.error('Booking creation error:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: 'Internal server error',
+      error: error.message
     });
   }
 });

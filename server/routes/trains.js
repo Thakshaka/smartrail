@@ -263,40 +263,94 @@ router.post('/fix-routes', async (req, res) => {
     const mainLineResult = await query('SELECT id FROM routes WHERE name = $1', ['Main Line']);
     const routeId = mainLineResult.rows[0]?.id;
 
-    const colomboResult = await query('SELECT id FROM stations WHERE name ILIKE $1', ['%Colombo%']);
-    const kandyResult = await query('SELECT id FROM stations WHERE name ILIKE $1', ['%Kandy%']);
-
-    const colomboId = colomboResult.rows[0]?.id;
-    const kandyId = kandyResult.rows[0]?.id;
-
-    if (routeId && colomboId && kandyId) {
-      // Clear existing route stations
-      await query('DELETE FROM route_stations WHERE route_id = $1', [routeId]);
-
-      // Add route stations for both directions
-      await query(`
-        INSERT INTO route_stations (route_id, station_id, order_index, arrival_time, departure_time)
-        VALUES
-        ($1, $2, 1, NULL, '06:00:00'),
-        ($1, $3, 2, '09:30:00', '09:45:00'),
-        ($1, $2, 3, '13:00:00', NULL)
-      `, [routeId, colomboId, kandyId]);
-
-      res.json({
-        success: true,
-        message: 'Route stations fixed successfully',
-        data: {
-          routeId,
-          colomboId,
-          kandyId
-        }
-      });
-    } else {
-      res.status(400).json({
+    if (!routeId) {
+      return res.status(400).json({
         success: false,
-        message: 'Could not find required route or stations'
+        message: 'Main Line route not found'
       });
     }
+
+    // Get all stations we need
+    const stationsResult = await query(`
+      SELECT id, name, code FROM stations
+      WHERE code IN ('CMB', 'MDA', 'RGM', 'GPH', 'VYA', 'MIG', 'PGH', 'KUR', 'KDY')
+      ORDER BY
+        CASE code
+          WHEN 'CMB' THEN 1
+          WHEN 'MDA' THEN 2
+          WHEN 'RGM' THEN 3
+          WHEN 'GPH' THEN 4
+          WHEN 'VYA' THEN 5
+          WHEN 'MIG' THEN 6
+          WHEN 'PGH' THEN 7
+          WHEN 'KUR' THEN 8
+          WHEN 'KDY' THEN 9
+        END
+    `);
+
+    const stations = stationsResult.rows;
+
+    if (stations.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Required stations not found'
+      });
+    }
+
+    // Clear existing route stations
+    await query('DELETE FROM route_stations WHERE route_id = $1', [routeId]);
+
+    // Define the complete route with proper times (Colombo to Kandy)
+    const routeStations = [
+      { code: 'CMB', order: 1, arrival: null, departure: '06:00:00' },
+      { code: 'MDA', order: 2, arrival: '06:07:00', departure: '06:09:00' },
+      { code: 'RGM', order: 3, arrival: '06:30:00', departure: '06:32:00' },
+      { code: 'GPH', order: 4, arrival: '06:50:00', departure: '06:52:00' },
+      { code: 'VYA', order: 5, arrival: '07:10:00', departure: '07:12:00' },
+      { code: 'MIG', order: 6, arrival: '07:25:00', departure: '07:27:00' },
+      { code: 'PGH', order: 7, arrival: '07:45:00', departure: '07:50:00' },
+      { code: 'KUR', order: 8, arrival: '08:15:00', departure: '08:20:00' },
+      { code: 'KDY', order: 9, arrival: '09:30:00', departure: '09:45:00' },
+      // Return journey (Kandy to Colombo) - continuing the same route
+      { code: 'KUR', order: 10, arrival: '15:30:00', departure: '15:35:00' },
+      { code: 'PGH', order: 11, arrival: '16:00:00', departure: '16:05:00' },
+      { code: 'MIG', order: 12, arrival: '16:25:00', departure: '16:27:00' },
+      { code: 'VYA', order: 13, arrival: '16:40:00', departure: '16:42:00' },
+      { code: 'GPH', order: 14, arrival: '17:00:00', departure: '17:02:00' },
+      { code: 'RGM', order: 15, arrival: '17:20:00', departure: '17:22:00' },
+      { code: 'MDA', order: 16, arrival: '17:43:00', departure: '17:45:00' },
+      { code: 'CMB', order: 17, arrival: '17:52:00', departure: null }
+    ];
+
+    // Insert route stations
+    for (const routeStation of routeStations) {
+      const station = stations.find(s => s.code === routeStation.code);
+      if (station) {
+        await query(`
+          INSERT INTO route_stations (route_id, station_id, order_index, arrival_time, departure_time)
+          VALUES ($1, $2, $3, $4, $5)
+        `, [routeId, station.id, routeStation.order, routeStation.arrival, routeStation.departure]);
+      }
+    }
+
+    // Verify the data
+    const verifyResult = await query(`
+      SELECT rs.order_index, s.name, s.code, rs.arrival_time, rs.departure_time
+      FROM route_stations rs
+      JOIN stations s ON rs.station_id = s.id
+      WHERE rs.route_id = $1
+      ORDER BY rs.order_index
+    `, [routeId]);
+
+    res.json({
+      success: true,
+      message: 'Route stations fixed successfully',
+      data: {
+        routeId,
+        stationsAdded: verifyResult.rows.length,
+        route: verifyResult.rows
+      }
+    });
 
   } catch (error) {
     logger.error('Fix routes error:', error);

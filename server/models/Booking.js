@@ -20,6 +20,14 @@ class Booking {
     this.classType = bookingData.class_type;
     this.createdAt = bookingData.created_at;
     this.updatedAt = bookingData.updated_at;
+
+    // Include joined fields for display
+    this.trainName = bookingData.train_name;
+    this.trainNumber = bookingData.train_number;
+    this.fromStationName = bookingData.from_station_name;
+    this.fromStationCode = bookingData.from_station_code;
+    this.toStationName = bookingData.to_station_name;
+    this.toStationCode = bookingData.to_station_code;
   }
 
   // Create new booking

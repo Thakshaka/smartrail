@@ -34,6 +34,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { useAlert } from '../contexts/AlertContext';
 import { stationService } from '../services/stationService';
 import { trainService } from '../services/trainService';
+import { useNavigate } from 'react-router-dom';
 
 const Search = () => {
   const [searchData, setSearchData] = useState({
@@ -49,6 +50,7 @@ const Search = () => {
   const [hasSearched, setHasSearched] = useState(false);
 
   const { showError } = useAlert();
+  const navigate = useNavigate();
 
   // Load stations on component mount
   useEffect(() => {
@@ -84,15 +86,14 @@ const Search = () => {
 
     try {
       const params = {
-        q: `${searchData.from_station} to ${searchData.to_station}`,
-        from_station: searchData.from_station,
-        to_station: searchData.to_station,
+        from: searchData.from_station,
+        to: searchData.to_station,
         date: searchData.date.toISOString().split('T')[0],
-        train_type: searchData.train_type !== 'all' ? searchData.train_type : undefined
+        type: searchData.train_type !== 'all' ? searchData.train_type : undefined
       };
 
       const response = await trainService.searchTrains(params);
-      setSearchResults(response.results || []);
+      setSearchResults(response.data?.trains || []);
     } catch (error) {
       showError('Failed to search trains');
       setSearchResults([]);
@@ -131,6 +132,16 @@ const Search = () => {
       default:
         return 'default';
     }
+  };
+
+  const handleBookNow = (train) => {
+    const params = new URLSearchParams({
+      train_id: train.id,
+      from: searchData.from_station,
+      to: searchData.to_station,
+      date: searchData.date.toISOString().split('T')[0]
+    });
+    navigate(`/booking?${params.toString()}`);
   };
 
   return (
@@ -363,6 +374,7 @@ const Search = () => {
                           variant="contained"
                           size="small"
                           fullWidth
+                          onClick={() => handleBookNow(train)}
                         >
                           Book Now
                         </Button>

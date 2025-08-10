@@ -35,7 +35,8 @@ import {
   History,
   BookOnline,
   Notifications,
-  Settings
+  Settings,
+  Refresh
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useAlert } from '../contexts/AlertContext';
@@ -100,7 +101,7 @@ const UserProfile = () => {
   const loadUserBookings = async () => {
     try {
       const response = await bookingService.getUserBookings();
-      setUserBookings(response.bookings || []);
+      setUserBookings(response.data?.bookings || []);
     } catch (error) {
       console.error('Failed to load user bookings:', error);
     }
@@ -222,6 +223,20 @@ const UserProfile = () => {
         return 'error';
       default:
         return 'default';
+    }
+  };
+
+  const getPassengerCount = (passengers) => {
+    try {
+      if (Array.isArray(passengers)) {
+        return passengers.length;
+      }
+      if (typeof passengers === 'string') {
+        return JSON.parse(passengers).length;
+      }
+      return 1; // Default fallback
+    } catch (error) {
+      return 1; // Default fallback
     }
   };
 
@@ -376,9 +391,20 @@ const UserProfile = () => {
 
               {/* Bookings Tab */}
               <TabPanel value={tabValue} index={1}>
-                <Typography variant="h6" gutterBottom>
-                  My Bookings
-                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="h6">
+                    My Bookings
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={loadUserBookings}
+                    disabled={loading}
+                    startIcon={loading ? <CircularProgress size={16} /> : <Refresh />}
+                  >
+                    Refresh
+                  </Button>
+                </Box>
 
                 {userBookings.length === 0 ? (
                   <Alert severity="info">
@@ -392,12 +418,12 @@ const UserProfile = () => {
                           <BookOnline color="primary" />
                         </ListItemIcon>
                         <ListItemText
-                          primary={`${booking.train_name} - ${booking.from_station} to ${booking.to_station}`}
-                          secondary={`${formatDate(booking.journey_date)} • ${booking.passengers.length} passenger(s)`}
+                          primary={`${booking.trainName} - ${booking.fromStationName} to ${booking.toStationName}`}
+                          secondary={`${formatDate(booking.travelDate)} • ${getPassengerCount(booking.passengers)} passenger(s) • Ref: ${booking.bookingReference}`}
                         />
                         <Chip
-                          label={booking.status}
-                          color={getBookingStatusColor(booking.status)}
+                          label={booking.bookingStatus || 'confirmed'}
+                          color={getBookingStatusColor(booking.bookingStatus || 'confirmed')}
                           size="small"
                         />
                       </ListItem>
