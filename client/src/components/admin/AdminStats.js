@@ -18,7 +18,8 @@ import {
 import {
   Refresh,
   TrendingUp,
-  Schedule
+  Schedule,
+  Add
 } from '@mui/icons-material';
 
 const AdminStats = ({ stats, onRefresh }) => {
@@ -155,6 +156,14 @@ const AdminStats = ({ stats, onRefresh }) => {
                     size="small"
                   />
                 </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="body2">Active Alerts</Typography>
+                  <Chip
+                    label="3"
+                    color="warning"
+                    size="small"
+                  />
+                </Box>
               </Box>
             </CardContent>
           </Card>
@@ -181,6 +190,15 @@ const AdminStats = ({ stats, onRefresh }) => {
                   fullWidth
                 >
                   Generate Report
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<Add />}
+                  size="small"
+                  fullWidth
+                  color="warning"
+                >
+                  Create Alert
                 </Button>
               </Box>
             </CardContent>

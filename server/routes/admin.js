@@ -5,6 +5,7 @@ const { query } = require('../config/database');
 const User = require('../models/User');
 const Train = require('../models/Train');
 const Booking = require('../models/Booking');
+const Alert = require('../models/Alert');
 const logger = require('../utils/logger');
 
 // Get dashboard statistics
@@ -283,6 +284,151 @@ router.patch('/bookings/:id/status', adminAuth, async (req, res) => {
 
   } catch (error) {
     logger.error('Admin update booking status error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
+// Alert management endpoints
+// Get all alerts for admin
+router.get('/alerts', adminAuth, async (req, res) => {
+  try {
+    const { page = 1, limit = 20, type = '', severity = '' } = req.query;
+
+    const options = {
+      page: parseInt(page),
+      limit: parseInt(limit)
+    };
+
+    if (type) options.type = type;
+    if (severity) options.severity = severity;
+
+    const result = await Alert.findAll(options);
+
+    res.json({
+      success: true,
+      data: result
+    });
+
+  } catch (error) {
+    logger.error('Admin get alerts error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
+// Create new alert
+router.post('/alerts', adminAuth, async (req, res) => {
+  try {
+    const { type, severity, title, message, trainId, stationId } = req.body;
+
+    // Validate required fields
+    if (!type || !severity || !title || !message) {
+      return res.status(400).json({
+        success: false,
+        message: 'Type, severity, title, and message are required'
+      });
+    }
+
+    const alertData = {
+      type,
+      severity,
+      title,
+      message,
+      trainId: trainId || null,
+      stationId: stationId || null
+    };
+
+    const newAlert = await Alert.create(alertData);
+
+    res.status(201).json({
+      success: true,
+      data: { alert: newAlert.toJSON() },
+      message: 'Alert created successfully'
+    });
+
+  } catch (error) {
+    logger.error('Admin create alert error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
+// Update alert
+router.put('/alerts/:id', adminAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { type, severity, title, message, trainId, stationId, isActive } = req.body;
+
+    // Validate required fields
+    if (!type || !severity || !title || !message) {
+      return res.status(400).json({
+        success: false,
+        message: 'Type, severity, title, and message are required'
+      });
+    }
+
+    const alertData = {
+      type,
+      severity,
+      title,
+      message,
+      trainId: trainId || null,
+      stationId: stationId || null,
+      isActive: isActive !== undefined ? isActive : true
+    };
+
+    const updatedAlert = await Alert.update(id, alertData);
+
+    if (!updatedAlert) {
+      return res.status(404).json({
+        success: false,
+        message: 'Alert not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: { alert: updatedAlert.toJSON() },
+      message: 'Alert updated successfully'
+    });
+
+  } catch (error) {
+    logger.error('Admin update alert error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
+// Delete alert
+router.delete('/alerts/:id', adminAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deleted = await Alert.delete(id);
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        message: 'Alert not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Alert deleted successfully'
+    });
+
+  } catch (error) {
+    logger.error('Admin delete alert error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error'

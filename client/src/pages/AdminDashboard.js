@@ -17,7 +17,8 @@ import {
   Train,
   BookOnline,
   Analytics,
-  Settings
+  Settings,
+  Notifications
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useAlert } from '../contexts/AlertContext';
@@ -26,6 +27,7 @@ import AdminStats from '../components/admin/AdminStats';
 import UserManagement from '../components/admin/UserManagement';
 import TrainManagement from '../components/admin/TrainManagement';
 import BookingManagement from '../components/admin/BookingManagement';
+import AlertManagement from '../components/admin/AlertManagement';
 import SystemSettings from '../components/admin/SystemSettings';
 
 const TabPanel = ({ children, value, index, ...other }) => (
@@ -171,6 +173,7 @@ const AdminDashboard = () => {
             <Tab icon={<People />} label="Users" />
             <Tab icon={<Train />} label="Trains" />
             <Tab icon={<BookOnline />} label="Bookings" />
+            <Tab icon={<Notifications />} label="Alerts" />
             <Tab icon={<Settings />} label="Settings" />
           </Tabs>
         </Box>
@@ -192,6 +195,10 @@ const AdminDashboard = () => {
         </TabPanel>
 
         <TabPanel value={tabValue} index={4}>
+          <AlertManagement />
+        </TabPanel>
+
+        <TabPanel value={tabValue} index={5}>
           <SystemSettings />
         </TabPanel>
       </Card>

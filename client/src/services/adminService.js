@@ -38,5 +38,26 @@ export const adminService = {
   updateBookingStatus: async (bookingId, status) => {
     const response = await api.patch(`/admin/bookings/${bookingId}/status`, { status });
     return response.data;
+  },
+
+  // Alert management
+  getAlerts: async (params = {}) => {
+    const response = await api.get('/admin/alerts', { params });
+    return response.data;
+  },
+
+  createAlert: async (alertData) => {
+    const response = await api.post('/admin/alerts', alertData);
+    return response.data;
+  },
+
+  updateAlert: async (alertId, alertData) => {
+    const response = await api.put(`/admin/alerts/${alertId}`, alertData);
+    return response.data;
+  },
+
+  deleteAlert: async (alertId) => {
+    const response = await api.delete(`/admin/alerts/${alertId}`);
+    return response.data;
   }
 };
