@@ -30,10 +30,8 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      // Soft-handle 401s: do not clear session automatically; let protected routes redirect
+      // Optionally, we could emit an event for UI notification
     }
     return Promise.reject(error);
   }

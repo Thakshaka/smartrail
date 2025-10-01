@@ -1,4 +1,6 @@
 const cron = require('node-cron');
+const fs = require('fs');
+const path = require('path');
 const { query } = require('../config/database');
 const Train = require('../models/Train');
 const socketService = require('./socketService');
@@ -9,6 +11,9 @@ class TrackingService {
   constructor() {
     this.isRunning = false;
     this.trackingInterval = null;
+    this.dataset = null; // optional ML/dataset-driven tracking points
+    this.datasetIndexByTrainId = new Map();
+    this.loadDatasetIfAvailable();
   }
 
   // Start real-time tracking service
@@ -56,11 +61,64 @@ class TrackingService {
       
       for (const train of trains) {
         if (train.status === 'running' || train.status === 'delayed') {
-          await this.simulateTrainMovement(train);
+          if (this.dataset) {
+            await this.advanceFromDataset(train);
+          } else {
+            await this.simulateTrainMovement(train);
+          }
         }
       }
     } catch (error) {
       logger.error('Error updating train locations:', error);
+    }
+  }
+
+  // Load dataset if present (server/data/tracking_dataset.json)
+  loadDatasetIfAvailable() {
+    try {
+      const datasetPath = path.join(__dirname, '..', 'data', 'tracking_dataset.json');
+      if (fs.existsSync(datasetPath)) {
+        const raw = fs.readFileSync(datasetPath, 'utf-8');
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          this.dataset = parsed; // { [trainId]: [ { latitude, longitude, speed, heading, stationId? } ] }
+          logger.info('📈 Tracking dataset loaded for ML-driven updates');
+        }
+      }
+    } catch (e) {
+      logger.warn('Failed to load tracking dataset, falling back to simulation');
+      this.dataset = null;
+    }
+  }
+
+  // Advance one step for the given train using dataset
+  async advanceFromDataset(train) {
+    const trainId = String(train.id);
+    const points = this.dataset?.[trainId];
+    if (!Array.isArray(points) || points.length === 0) {
+      return; // no dataset for this train
+    }
+    const currentIndex = this.datasetIndexByTrainId.get(trainId) ?? 0;
+    const point = points[currentIndex % points.length];
+    this.datasetIndexByTrainId.set(trainId, (currentIndex + 1) % points.length);
+
+    const locationData = {
+      latitude: Number(point.latitude),
+      longitude: Number(point.longitude),
+      speed: Number(point.speed) || 0,
+      heading: Number(point.heading) || 0,
+      stationId: point.stationId || null,
+      estimatedArrival: point.estimatedArrival || null,
+      accuracy: Number(point.accuracy) || 10
+    };
+
+    await this.saveTrackingData(train.id, locationData);
+    socketService.broadcastTrainUpdate(train.id, locationData);
+    // Proactively update predictions for this train based on new data
+    try {
+      await predictionService.updateTrainPredictions(train.id);
+    } catch (e) {
+      logger.warn(`Prediction update failed for train ${train.id}: ${e.message || e}`);
     }
   }
 

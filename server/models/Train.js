@@ -183,7 +183,7 @@ class Train {
       `SELECT p.*, s.name as station_name
        FROM predictions p
        JOIN stations s ON p.station_id = s.id
-       WHERE p.train_id = $1 AND p.predicted_time > NOW()
+       WHERE p.train_id = $1
        ORDER BY p.predicted_time`,
       [this.id]
     );

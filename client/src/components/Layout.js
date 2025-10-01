@@ -16,7 +16,11 @@ import {
   Menu,
   MenuItem,
   Avatar,
-  Divider
+  Divider,
+  Chip,
+  Fade,
+  Slide,
+  useScrollTrigger
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -44,6 +48,12 @@ const Layout = ({ children }) => {
   const { user, logout, isAuthenticated } = useAuth();
   const { alerts } = useSocket();
   const { showSuccess } = useAlert();
+
+  // Scroll trigger for AppBar elevation
+  const trigger = useScrollTrigger({
+    disableHysteresis: true,
+    threshold: 0,
+  });
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -86,36 +96,75 @@ const Layout = ({ children }) => {
   ];
 
   const drawer = (
-    <Box sx={{ width: 250 }}>
-      <Box sx={{ p: 2, textAlign: 'center' }}>
-        <Typography variant="h6" color="primary">
+    <Box sx={{ width: 280, height: '100%', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+      <Box sx={{ p: 3, textAlign: 'center', background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
+        <Box component="img" src="/logo.svg" alt="SmartRail" sx={{ height: 40, width: 40, mb: 1, filter: 'brightness(0) invert(1)' }} />
+        <Typography variant="h6" sx={{ color: 'white', fontWeight: 700, letterSpacing: '-0.02em' }}>
           SmartRail
         </Typography>
+        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+          Sri Lanka Railway
+        </Typography>
       </Box>
-      <Divider />
-      <List>
+      <Divider sx={{ borderColor: 'rgba(255,255,255,0.2)' }} />
+      <List sx={{ px: 2, py: 1 }}>
         {menuItems.map((item) => (
           <ListItem
             button
             key={item.text}
             onClick={() => handleNavigation(item.path)}
             selected={location.pathname === item.path}
+            sx={{
+              borderRadius: 2,
+              mb: 0.5,
+              color: 'white',
+              '&.Mui-selected': {
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                '&:hover': {
+                  backgroundColor: 'rgba(255,255,255,0.3)',
+                },
+              },
+              '&:hover': {
+                backgroundColor: 'rgba(255,255,255,0.1)',
+              },
+            }}
           >
-            <ListItemIcon>{item.icon}</ListItemIcon>
+            <ListItemIcon sx={{ color: 'white' }}>{item.icon}</ListItemIcon>
             <ListItemText primary={item.text} />
           </ListItem>
         ))}
       </List>
       {isAuthenticated && (
         <>
-          <Divider />
-          <List>
-            <ListItem button onClick={() => handleNavigation('/profile')}>
-              <ListItemIcon><Person /></ListItemIcon>
+          <Divider sx={{ borderColor: 'rgba(255,255,255,0.2)', my: 2 }} />
+          <List sx={{ px: 2 }}>
+            <ListItem 
+              button 
+              onClick={() => handleNavigation('/profile')}
+              sx={{
+                borderRadius: 2,
+                mb: 0.5,
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                },
+              }}
+            >
+              <ListItemIcon sx={{ color: 'white' }}><Person /></ListItemIcon>
               <ListItemText primary="Profile" />
             </ListItem>
-            <ListItem button onClick={handleLogout}>
-              <ListItemIcon><Logout /></ListItemIcon>
+            <ListItem 
+              button 
+              onClick={handleLogout}
+              sx={{
+                borderRadius: 2,
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                },
+              }}
+            >
+              <ListItemIcon sx={{ color: 'white' }}><Logout /></ListItemIcon>
               <ListItemText primary="Logout" />
             </ListItem>
           </List>
@@ -126,111 +175,238 @@ const Layout = ({ children }) => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <AppBar position="static">
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          
-          <Typography
-            variant="h6"
-            component="div"
-            sx={{ flexGrow: 1, cursor: 'pointer' }}
-            onClick={() => navigate('/')}
-          >
-            SmartRail
-          </Typography>
-
-          {/* Desktop Navigation */}
-          <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1 }}>
-            {menuItems.map((item) => (
-              <Button
-                key={item.text}
-                color="inherit"
-                onClick={() => handleNavigation(item.path)}
-                sx={{
-                  backgroundColor: location.pathname === item.path ? 'rgba(255,255,255,0.1)' : 'transparent'
+      <Slide appear={false} direction="down" in={!trigger}>
+        <AppBar 
+          position="fixed" 
+          elevation={trigger ? 4 : 0}
+          sx={{
+            background: trigger 
+              ? 'rgba(255,255,255,0.95)' 
+              : 'linear-gradient(135deg, #1a237e 0%, #534bae 100%)',
+            backdropFilter: 'blur(20px)',
+            transition: 'all 0.3s ease-in-out',
+            borderBottom: trigger ? '1px solid rgba(0,0,0,0.1)' : 'none',
+          }}
+        >
+          <Toolbar sx={{ py: 1 }}>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{ 
+                mr: 2, 
+                display: { sm: 'none' },
+                color: trigger ? 'primary.main' : 'white'
+              }}
+            >
+              <MenuIcon />
+            </IconButton>
+            
+            <Box 
+              onClick={() => navigate('/')} 
+              sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 2, 
+                flexGrow: 1, 
+                cursor: 'pointer',
+                transition: 'all 0.2s ease-in-out',
+                '&:hover': {
+                  transform: 'scale(1.02)',
+                }
+              }}
+            >
+              <Box 
+                component="img" 
+                src="/logo.svg" 
+                alt="SmartRail" 
+                sx={{ 
+                  height: 40, 
+                  width: 40,
+                  filter: trigger ? 'none' : 'brightness(0) invert(1)',
+                  transition: 'all 0.2s ease-in-out'
+                }} 
+              />
+              <Typography 
+                variant="h6" 
+                component="div"
+                sx={{ 
+                  color: trigger ? 'primary.main' : 'white',
+                  fontWeight: 700,
+                  fontSize: '1.5rem',
+                  letterSpacing: '-0.02em'
                 }}
               >
-                {item.text}
-              </Button>
-            ))}
-          </Box>
-
-          {/* User Menu */}
-          {isAuthenticated ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <IconButton
-                color="inherit"
-                onClick={() => navigate('/alerts')}
-              >
-                <Badge badgeContent={alerts.length} color="error">
-                  <Notifications />
-                </Badge>
-              </IconButton>
-              
-              <IconButton
-                onClick={handleProfileMenuOpen}
-                sx={{ ml: 1 }}
-              >
-                <Avatar sx={{ width: 32, height: 32 }}>
-                  {user?.first_name?.charAt(0) || 'U'}
-                </Avatar>
-              </IconButton>
-              
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleProfileMenuClose}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right',
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-              >
-                <MenuItem onClick={() => { handleNavigation('/profile'); handleProfileMenuClose(); }}>
-                  <ListItemIcon><Person fontSize="small" /></ListItemIcon>
-                  Profile
-                </MenuItem>
-                <MenuItem onClick={() => { handleNavigation('/booking'); handleProfileMenuClose(); }}>
-                  <ListItemIcon><BookOnline fontSize="small" /></ListItemIcon>
-                  My Bookings
-                </MenuItem>
-                <Divider />
-                <MenuItem onClick={handleLogout}>
-                  <ListItemIcon><Logout fontSize="small" /></ListItemIcon>
-                  Logout
-                </MenuItem>
-              </Menu>
+                SmartRail
+              </Typography>
             </Box>
-          ) : (
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button
-                color="inherit"
-                onClick={() => navigate('/login')}
-              >
-                Login
-              </Button>
-              <Button
-                variant="outlined"
-                color="inherit"
-                onClick={() => navigate('/register')}
-              >
-                Register
-              </Button>
+
+            {/* Desktop Navigation */}
+            <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 0.5 }}>
+              {menuItems.map((item) => (
+                <Button
+                  key={item.text}
+                  onClick={() => handleNavigation(item.path)}
+                  sx={{
+                    color: trigger ? 'primary.main' : 'white',
+                    backgroundColor: location.pathname === item.path 
+                      ? (trigger ? 'rgba(26,35,126,0.1)' : 'rgba(255,255,255,0.2)')
+                      : 'transparent',
+                    borderRadius: 2,
+                    px: 2,
+                    py: 1,
+                    fontWeight: 600,
+                    transition: 'all 0.2s ease-in-out',
+                    '&:hover': {
+                      backgroundColor: location.pathname === item.path 
+                        ? (trigger ? 'rgba(26,35,126,0.15)' : 'rgba(255,255,255,0.25)')
+                        : (trigger ? 'rgba(26,35,126,0.08)' : 'rgba(255,255,255,0.1)'),
+                      transform: 'translateY(-1px)',
+                    },
+                  }}
+                >
+                  {item.text}
+                </Button>
+              ))}
             </Box>
-          )}
-        </Toolbar>
-      </AppBar>
+
+            {/* User Menu */}
+            {isAuthenticated ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <IconButton
+                  color="inherit"
+                  onClick={() => navigate('/alerts')}
+                  sx={{
+                    color: trigger ? 'primary.main' : 'white',
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.2)',
+                      transform: 'scale(1.1)',
+                    },
+                    transition: 'all 0.2s ease-in-out',
+                  }}
+                >
+                  <Badge badgeContent={alerts.length} color="error">
+                    <Notifications />
+                  </Badge>
+                </IconButton>
+                
+                <IconButton
+                  onClick={handleProfileMenuOpen}
+                  sx={{ 
+                    ml: 1,
+                    '&:hover': {
+                      transform: 'scale(1.05)',
+                    },
+                    transition: 'all 0.2s ease-in-out',
+                  }}
+                >
+                  <Avatar 
+                    sx={{ 
+                      width: 40, 
+                      height: 40,
+                      background: trigger 
+                        ? 'linear-gradient(135deg, #1a237e, #534bae)' 
+                        : 'linear-gradient(135deg, #ff6f00, #ff9f40)',
+                      fontWeight: 700,
+                      fontSize: '1.1rem',
+                    }}
+                  >
+                    {user?.first_name?.charAt(0) || 'U'}
+                  </Avatar>
+                </IconButton>
+              
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleProfileMenuClose}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                  }}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  PaperProps={{
+                    sx: {
+                      borderRadius: 3,
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+                      border: '1px solid rgba(0,0,0,0.08)',
+                      mt: 1,
+                    }
+                  }}
+                >
+                  <MenuItem 
+                    onClick={() => { handleNavigation('/profile'); handleProfileMenuClose(); }}
+                    sx={{ borderRadius: 2, mx: 1, my: 0.5 }}
+                  >
+                    <ListItemIcon><Person fontSize="small" /></ListItemIcon>
+                    Profile
+                  </MenuItem>
+                  <MenuItem 
+                    onClick={() => { handleNavigation('/booking'); handleProfileMenuClose(); }}
+                    sx={{ borderRadius: 2, mx: 1, my: 0.5 }}
+                  >
+                    <ListItemIcon><BookOnline fontSize="small" /></ListItemIcon>
+                    My Bookings
+                  </MenuItem>
+                  <Divider />
+                  <MenuItem 
+                    onClick={handleLogout}
+                    sx={{ borderRadius: 2, mx: 1, my: 0.5, color: 'error.main' }}
+                  >
+                    <ListItemIcon><Logout fontSize="small" /></ListItemIcon>
+                    Logout
+                  </MenuItem>
+                </Menu>
+              </Box>
+            ) : (
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  color="inherit"
+                  onClick={() => navigate('/login')}
+                  sx={{
+                    color: trigger ? 'primary.main' : 'white',
+                    fontWeight: 600,
+                    px: 3,
+                    py: 1,
+                    borderRadius: 2,
+                    '&:hover': {
+                      backgroundColor: trigger ? 'rgba(26,35,126,0.08)' : 'rgba(255,255,255,0.1)',
+                      transform: 'translateY(-1px)',
+                    },
+                    transition: 'all 0.2s ease-in-out',
+                  }}
+                >
+                  Login
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => navigate('/register')}
+                  sx={{
+                    color: trigger ? 'primary.main' : 'white',
+                    borderColor: trigger ? 'primary.main' : 'white',
+                    fontWeight: 600,
+                    px: 3,
+                    py: 1,
+                    borderRadius: 2,
+                    '&:hover': {
+                      backgroundColor: trigger ? 'primary.main' : 'white',
+                      color: trigger ? 'white' : 'primary.main',
+                      transform: 'translateY(-1px)',
+                    },
+                    transition: 'all 0.2s ease-in-out',
+                  }}
+                >
+                  Register
+                </Button>
+              </Box>
+            )}
+          </Toolbar>
+        </AppBar>
+      </Slide>
 
       {/* Mobile Drawer */}
       <Drawer
@@ -249,9 +425,13 @@ const Layout = ({ children }) => {
       </Drawer>
 
       {/* Main Content */}
-      <Box component="main" sx={{ flexGrow: 1, py: 3 }}>
-        <Container maxWidth="lg">
-          {children}
+      <Box component="main" sx={{ flexGrow: 1, pt: 10, pb: 4 }}>
+        <Container maxWidth="xl">
+          <Fade in timeout={600}>
+            <Box>
+              {children}
+            </Box>
+          </Fade>
         </Container>
       </Box>
 
@@ -259,19 +439,36 @@ const Layout = ({ children }) => {
       <Box
         component="footer"
         sx={{
-          py: 3,
+          py: 4,
           px: 2,
           mt: 'auto',
-          backgroundColor: (theme) =>
-            theme.palette.mode === 'light'
-              ? theme.palette.grey[200]
-              : theme.palette.grey[800],
+          background: 'linear-gradient(135deg, #1a202c 0%, #2d3748 100%)',
+          color: 'white',
         }}
       >
         <Container maxWidth="lg">
-          <Typography variant="body2" color="text.secondary" align="center">
-            © 2024 SmartRail - Sri Lanka Railway Management System. All rights reserved.
-          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box component="img" src="/logo.svg" alt="SmartRail" sx={{ height: 24, width: 24, filter: 'brightness(0) invert(1)' }} />
+              <Typography variant="h6" sx={{ fontWeight: 700, letterSpacing: '-0.02em' }}>
+                SmartRail
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 3, alignItems: 'center' }}>
+              <Chip 
+                label="Sri Lanka Railway" 
+                size="small" 
+                sx={{ 
+                  backgroundColor: 'rgba(255,255,255,0.1)', 
+                  color: 'white',
+                  fontWeight: 500 
+                }} 
+              />
+              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                © 2024 SmartRail. All rights reserved.
+              </Typography>
+            </Box>
+          </Box>
         </Container>
       </Box>
     </Box>

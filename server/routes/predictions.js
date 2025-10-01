@@ -72,7 +72,52 @@ router.get('/train/:trainId', async (req, res) => {
       });
     }
 
-    const predictions = await train.getPredictions();
+    let predictions = await train.getPredictions();
+
+    // If no predictions exist yet, trigger generation and retry once
+    if (!Array.isArray(predictions) || predictions.length === 0) {
+      try {
+        const predictionService = require('../services/predictionService');
+        await predictionService.updateTrainPredictions(trainId);
+        predictions = await train.getPredictions();
+      } catch (e) {
+        // ignore; will return empty list
+      }
+    }
+
+    // Final fallback: synthesize from schedule if still empty
+    if (!Array.isArray(predictions) || predictions.length === 0) {
+      try {
+        const schedule = await train.getSchedule();
+        if (Array.isArray(schedule) && schedule.length > 0) {
+          const now = new Date();
+          const upcoming = schedule.filter(s => {
+            try {
+              const t = new Date(`${now.toDateString()} ${s.arrival_time}`);
+              return t > now;
+            } catch (e) { return false; }
+          });
+          const target = (upcoming.length > 0 ? upcoming : schedule).slice(0, 5);
+          const predictionService = require('../services/predictionService');
+          const synthesized = [];
+          for (const s of target) {
+            const p = await predictionService.getFallbackPrediction(train.id, s.station_id);
+            synthesized.push({
+              station_id: s.station_id,
+              station_name: s.station_name,
+              predicted_time: p.predicted_time,
+              scheduled_time: s.arrival_time,
+              confidence_score: p.confidence_score,
+              delay_minutes: p.delay_minutes,
+              prediction_method: p.prediction_method
+            });
+          }
+          predictions = synthesized;
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
 
     res.json({
       success: true,

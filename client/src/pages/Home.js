@@ -1,9 +1,11 @@
 import React from 'react';
 import {
-  Box, Typography, Button, Grid, Card, CardContent, CardMedia, Container, Paper, Stack, Chip
+  Box, Typography, Button, Grid, Card, CardContent, CardMedia, Container, Paper, Stack, Chip,
+  Fade, Slide, useTheme, useMediaQuery, alpha
 } from '@mui/material';
 import {
-  Train, Search, BookOnline, Notifications, Speed, LocationOn, Schedule, Security
+  Train, Search, BookOnline, Notifications, Speed, LocationOn, Schedule, Security,
+  TrendingUp, Verified, Star, ArrowForward
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -14,6 +16,8 @@ import srilankanTrainBackground from '../assets/srilankan-train.jpg';
 const Home = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const features = [
     {
@@ -64,13 +68,14 @@ const Home = () => {
       {/* Hero Section */}
       <Paper sx={{
         position: 'relative',
-        backgroundImage: `linear-gradient(135deg, rgba(25, 118, 210, 0.8) 0%, rgba(66, 165, 245, 0.7) 50%, rgba(100, 181, 246, 0.6) 100%), url(${srilankanTrainBackground})`,
+        backgroundImage: `linear-gradient(135deg, rgba(26, 35, 126, 0.85) 0%, rgba(83, 75, 174, 0.8) 50%, rgba(255, 111, 0, 0.7) 100%), url(${srilankanTrainBackground})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        minHeight: '80vh',
+        minHeight: '90vh',
         display: 'flex',
         alignItems: 'center',
+        overflow: 'hidden',
         '&::before': {
           content: '""',
           position: 'absolute',
@@ -78,61 +83,146 @@ const Home = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.3)',
+          background: 'linear-gradient(45deg, rgba(26,35,126,0.1) 0%, rgba(255,111,0,0.1) 100%)',
           zIndex: 1
         }
       }}>
         <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
-          <Box sx={{ textAlign: 'center', color: 'white' }}>
-            <Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: 700 }}>
-              Welcome to SmartRail
-            </Typography>
-            <Typography variant="h5" gutterBottom sx={{ mb: 4, opacity: 0.9 }}>
-              Real-time train tracking and intelligent booking system for Sri Lanka Railways
-            </Typography>
-            <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap">
-              <Button
-                variant="contained"
-                size="large"
-                onClick={() => navigate('/search')}
-                sx={{ minWidth: 150 }}
-              >
-                Search Trains
-              </Button>
-              <Button
-                variant="outlined"
-                size="large"
-                onClick={() => navigate('/tracking')}
-                sx={{
-                  minWidth: 150,
-                  color: 'white',
-                  borderColor: 'white',
-                  '&:hover': {
-                    borderColor: 'white',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                  }
-                }}
-              >
-                Track Trains
-              </Button>
-            </Stack>
-          </Box>
+          <Fade in timeout={1000}>
+            <Box sx={{ textAlign: 'center', color: 'white' }}>
+              <Slide direction="up" in timeout={1200}>
+                <Typography 
+                  variant={isMobile ? "h3" : "h2"} 
+                  component="h1" 
+                  gutterBottom 
+                  sx={{ 
+                    fontWeight: 800,
+                    background: 'linear-gradient(45deg, #ffffff 30%, #ff6f00 90%)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    mb: 2
+                  }}
+                >
+                  Welcome to SmartRail
+                </Typography>
+              </Slide>
+              <Slide direction="up" in timeout={1400}>
+                <Typography 
+                  variant={isMobile ? "h6" : "h5"} 
+                  gutterBottom 
+                  sx={{ 
+                    mb: 4, 
+                    opacity: 0.95,
+                    fontWeight: 400,
+                    maxWidth: '800px',
+                    mx: 'auto'
+                  }}
+                >
+                  Experience the future of railway travel with real-time tracking, AI-powered predictions, and seamless booking
+                </Typography>
+              </Slide>
+              <Slide direction="up" in timeout={1600}>
+                <Stack 
+                  direction={{ xs: 'column', sm: 'row' }} 
+                  spacing={3} 
+                  justifyContent="center" 
+                  flexWrap="wrap"
+                  sx={{ mt: 4 }}
+                >
+                  <Button
+                    variant="contained"
+                    size="large"
+                    onClick={() => navigate('/search')}
+                    endIcon={<ArrowForward />}
+                    sx={{ 
+                      minWidth: 200,
+                      py: 1.5,
+                      fontSize: '1.1rem',
+                      fontWeight: 700,
+                      background: 'linear-gradient(45deg, #ff6f00 30%, #ff9f40 90%)',
+                      boxShadow: '0 8px 32px rgba(255, 111, 0, 0.3)',
+                      '&:hover': {
+                        background: 'linear-gradient(45deg, #e65100 30%, #ff6f00 90%)',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 12px 40px rgba(255, 111, 0, 0.4)',
+                      },
+                      transition: 'all 0.3s ease-in-out'
+                    }}
+                  >
+                    Search Trains
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="large"
+                    onClick={() => navigate('/tracking')}
+                    endIcon={<Train />}
+                    sx={{
+                      minWidth: 200,
+                      py: 1.5,
+                      fontSize: '1.1rem',
+                      fontWeight: 700,
+                      color: 'white',
+                      borderColor: 'white',
+                      borderWidth: 2,
+                      '&:hover': {
+                        borderColor: 'white',
+                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 8px 32px rgba(255, 255, 255, 0.2)',
+                      },
+                      transition: 'all 0.3s ease-in-out'
+                    }}
+                  >
+                    Track Trains
+                  </Button>
+                </Stack>
+              </Slide>
+            </Box>
+          </Fade>
         </Container>
       </Paper>
 
       {/* Stats Section */}
-      <Container maxWidth="lg" sx={{ mb: 6 }}>
-        <Grid container spacing={4} sx={{ mt: -8, position: 'relative', zIndex: 3 }}>
+      <Container maxWidth="lg" sx={{ mb: 8 }}>
+        <Grid container spacing={4} sx={{ mt: -6, position: 'relative', zIndex: 3 }}>
           {stats.map((stat, index) => (
             <Grid item xs={12} sm={6} md={3} key={index}>
-              <Card sx={{ textAlign: 'center', p: 3 }}>
-                <Typography variant="h3" component="div" color="primary" gutterBottom>
-                  {stat.value}
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  {stat.label}
-                </Typography>
-              </Card>
+              <Slide direction="up" in timeout={1800 + index * 200}>
+                <Card 
+                  sx={{ 
+                    textAlign: 'center', 
+                    p: 4,
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                    transition: 'all 0.3s ease-in-out',
+                    '&:hover': {
+                      transform: 'translateY(-8px)',
+                      boxShadow: '0 16px 48px rgba(0,0,0,0.15)',
+                    }
+                  }}
+                >
+                  <Typography 
+                    variant="h3" 
+                    component="div" 
+                    sx={{
+                      background: 'linear-gradient(45deg, #1a237e 30%, #ff6f00 90%)',
+                      backgroundClip: 'text',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      fontWeight: 800,
+                      mb: 1
+                    }}
+                  >
+                    {stat.value}
+                  </Typography>
+                  <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 600 }}>
+                    {stat.label}
+                  </Typography>
+                </Card>
+              </Slide>
             </Grid>
           ))}
         </Grid>

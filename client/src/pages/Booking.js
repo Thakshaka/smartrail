@@ -22,7 +22,8 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemIcon
+  ListItemIcon,
+  Tooltip
 } from '@mui/material';
 import {
   Train,
@@ -612,27 +613,205 @@ const Booking = () => {
                   Select {bookingData.passengers.length} seat(s) for your passengers
                 </Alert>
 
-                <Grid container spacing={2}>
-                  {Array.from({ length: 50 }, (_, i) => (
-                    <Grid item xs={2} sm={1} key={i}>
-                      <Button
-                        variant={bookingData.selected_seats.includes(i) ? "contained" : "outlined"}
-                        size="small"
-                        onClick={() => handleSeatSelection(i)}
-                        disabled={bookingData.selected_seats.length >= bookingData.passengers.length && !bookingData.selected_seats.includes(i)}
-                        sx={{ minWidth: 'auto', width: '100%' }}
-                      >
-                        {i + 1}
-                      </Button>
-                    </Grid>
-                  ))}
-                </Grid>
+                {(() => {
+                  const totalSeats = 48; // multiple of 4 for complete rows
+                  const seatsPerRow = 4; // W A A W
+                  const rows = Math.ceil(totalSeats / seatsPerRow);
 
-                {bookingData.selected_seats.length > 0 && (
-                  <Alert severity="success" sx={{ mt: 2 }}>
-                    Selected seats: {bookingData.selected_seats.map(seat => seat + 1).join(', ')}
-                  </Alert>
-                )}
+                  const seatMetaFor = (index) => {
+                    const positionInRow = index % seatsPerRow; // 0..3
+                    const isWindow = positionInRow === 0 || positionInRow === 3; // W _ _ W
+                    const isAisle = positionInRow === 1 || positionInRow === 2;  // _ A A _
+                    return { isWindow, isAisle };
+                  };
+
+                  return (
+                    <Box>
+                      {/* Enhanced Legend */}
+                      <Box sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: 2, 
+                        mb: 3,
+                        p: 2,
+                        bgcolor: 'grey.50',
+                        borderRadius: 2,
+                        border: '1px solid',
+                        borderColor: 'grey.200'
+                      }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box sx={{ 
+                            width: 20, 
+                            height: 20, 
+                            bgcolor: 'primary.main', 
+                            borderRadius: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            fontSize: '12px',
+                            fontWeight: 'bold'
+                          }}>
+                            W
+                          </Box>
+                          <Typography variant="body2" fontWeight="medium">Window</Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box sx={{ 
+                            width: 20, 
+                            height: 20, 
+                            bgcolor: 'secondary.main', 
+                            borderRadius: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            fontSize: '12px',
+                            fontWeight: 'bold'
+                          }}>
+                            A
+                          </Box>
+                          <Typography variant="body2" fontWeight="medium">Aisle</Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box sx={{ 
+                            width: 20, 
+                            height: 20, 
+                            bgcolor: 'success.main', 
+                            borderRadius: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            fontSize: '12px',
+                            fontWeight: 'bold'
+                          }}>
+                            ✓
+                          </Box>
+                          <Typography variant="body2" fontWeight="medium">Selected</Typography>
+                        </Box>
+                      </Box>
+
+                      {/* Train Layout Header */}
+                      <Box sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        mb: 2,
+                        p: 1,
+                        bgcolor: 'primary.50',
+                        borderRadius: 1
+                      }}>
+                        <Typography variant="body2" fontWeight="bold" color="primary.main">
+                          🚂 Train Layout - {bookingData.class.charAt(0).toUpperCase() + bookingData.class.slice(1)} Class
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Select {bookingData.passengers.length} seat(s)
+                        </Typography>
+                      </Box>
+
+                      <Grid container spacing={1}>
+                        {Array.from({ length: rows }).map((_, row) => {
+                          const rowStartIndex = row * seatsPerRow;
+                          return (
+                            <Grid container item spacing={1} key={row} sx={{ mb: 1 }} alignItems="center">
+                              <Grid item xs={12}>
+                                <Grid container spacing={1}>
+                                  {Array.from({ length: seatsPerRow }).map((__, col) => {
+                                    const i = rowStartIndex + col;
+                                    if (i >= totalSeats) return null;
+                                    const selected = bookingData.selected_seats.includes(i);
+                                    const { isWindow, isAisle } = seatMetaFor(i);
+                                    const disabled = bookingData.selected_seats.length >= bookingData.passengers.length && !selected;
+                                    const seatLabel = isWindow ? 'Window' : isAisle ? 'Aisle' : 'Standard';
+                                    return (
+                                      <Grid item xs={12 / seatsPerRow} key={i}>
+                                        <Tooltip title={`Seat ${i + 1} - ${seatLabel} seat`} arrow>
+                                          <Button
+                                            variant={selected ? 'contained' : 'outlined'}
+                                            size="small"
+                                            onClick={() => handleSeatSelection(i)}
+                                            disabled={disabled}
+                                            sx={{
+                                              minWidth: 'auto',
+                                              width: '100%',
+                                              height: 40,
+                                              position: 'relative',
+                                              borderColor: isWindow && !selected ? 'primary.main' : isAisle && !selected ? 'secondary.main' : 'grey.400',
+                                              color: selected ? 'white' : (isWindow ? 'primary.main' : isAisle ? 'secondary.main' : 'text.primary'),
+                                              fontWeight: isWindow || isAisle ? 700 : 500,
+                                              bgcolor: selected ? 'success.main' : (isWindow ? 'primary.50' : isAisle ? 'secondary.50' : 'grey.50'),
+                                              borderWidth: isWindow || isAisle ? 2 : 1,
+                                              '&:hover': {
+                                                bgcolor: selected ? 'success.dark' : (isWindow ? 'primary.100' : isAisle ? 'secondary.100' : 'grey.100'),
+                                                transform: 'scale(1.05)',
+                                                transition: 'all 0.2s ease-in-out'
+                                              },
+                                              '&:disabled': {
+                                                bgcolor: 'grey.100',
+                                                color: 'grey.400',
+                                                borderColor: 'grey.300'
+                                              }
+                                            }}
+                                          >
+                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                              <Typography variant="caption" sx={{ fontSize: '10px', lineHeight: 1 }}>
+                                                {isWindow ? 'W' : isAisle ? 'A' : 'S'}
+                                              </Typography>
+                                              <Typography variant="body2" sx={{ fontSize: '12px', fontWeight: 'bold' }}>
+                                                {i + 1}
+                                              </Typography>
+                                            </Box>
+                                          </Button>
+                                        </Tooltip>
+                                      </Grid>
+                                    );
+                                  })}
+                                </Grid>
+                              </Grid>
+                            </Grid>
+                          );
+                        })}
+                      </Grid>
+
+                      {/* Seat Selection Summary */}
+                      {bookingData.selected_seats.length > 0 && (
+                        <Alert 
+                          severity="success" 
+                          sx={{ 
+                            mt: 3,
+                            '& .MuiAlert-message': {
+                              width: '100%'
+                            }
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Box>
+                              <Typography variant="subtitle2" gutterBottom>
+                                Selected Seats: {bookingData.selected_seats.map(seat => seat + 1).join(', ')}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                {bookingData.selected_seats.map(seat => {
+                                  const { isWindow, isAisle } = seatMetaFor(seat);
+                                  return `${seat + 1} (${isWindow ? 'Window' : isAisle ? 'Aisle' : 'Standard'})`;
+                                }).join(', ')}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ textAlign: 'right' }}>
+                              <Typography variant="h6" color="success.main">
+                                {bookingData.selected_seats.length} / {bookingData.passengers.length}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                seats selected
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Alert>
+                      )}
+                    </Box>
+                  );
+                })()}
+
               </Paper>
             )}
           </Box>

@@ -1,0 +1,15 @@
+{
+  "1": [
+    { "latitude": 6.9271, "longitude": 79.8612, "speed": 60, "heading": 45, "accuracy": 8 },
+    { "latitude": 6.9500, "longitude": 79.9000, "speed": 62, "heading": 50, "accuracy": 8 },
+    { "latitude": 7.0000, "longitude": 80.0000, "speed": 65, "heading": 60, "accuracy": 8 },
+    { "latitude": 7.1000, "longitude": 80.2000, "speed": 70, "heading": 70, "accuracy": 8 }
+  ],
+  "2": [
+    { "latitude": 7.2906, "longitude": 80.6337, "speed": 55, "heading": 220, "accuracy": 9 },
+    { "latitude": 7.2500, "longitude": 80.5500, "speed": 58, "heading": 210, "accuracy": 9 },
+    { "latitude": 7.2000, "longitude": 80.4800, "speed": 60, "heading": 200, "accuracy": 9 },
+    { "latitude": 7.1500, "longitude": 80.4200, "speed": 62, "heading": 195, "accuracy": 9 }
+  ]
+}
+

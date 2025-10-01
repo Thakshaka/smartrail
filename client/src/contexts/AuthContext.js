@@ -12,28 +12,29 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => authService.getCurrentUser());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Check if user is logged in on app start
+  // Initialize from localStorage and optionally refresh profile
   useEffect(() => {
     const token = authService.getToken();
     if (token) {
-      checkAuthStatus();
-    } else {
-      setLoading(false);
+      // We already seeded user from localStorage; try refreshing profile silently
+      checkAuthStatus(true);
     }
+    setLoading(false);
   }, []);
 
   // Check authentication status
-  const checkAuthStatus = async () => {
+  const checkAuthStatus = async (silent = false) => {
     try {
       const response = await authService.getProfile();
       setUser(response.user);
     } catch (error) {
       console.error('Auth check failed:', error);
-      authService.logout();
+      // Do not force logout on transient failures; keep existing session
+      if (!silent) setError('Session check failed. Using cached session.');
     } finally {
       setLoading(false);
     }

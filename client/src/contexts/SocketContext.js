@@ -21,9 +21,11 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     // Initialize socket connection
+    const token = localStorage.getItem('token');
     const newSocket = io('http://localhost:5000', {
       transports: ['websocket', 'polling'],
       autoConnect: true,
+      auth: token ? { token } : undefined
     });
 
     setSocket(newSocket);
@@ -45,11 +47,13 @@ export const SocketProvider = ({ children }) => {
     });
 
     // Train location updates
-    newSocket.on('train-location-update', (data) => {
+    newSocket.on('train_location_update', (payload) => {
+      const { trainId, location } = payload || {};
+      if (!trainId || !location) return;
       setTrainUpdates(prev => ({
         ...prev,
-        [data.train_id]: {
-          ...data,
+        [trainId]: {
+          ...location,
           timestamp: new Date().toISOString()
         }
       }));
@@ -72,7 +76,7 @@ export const SocketProvider = ({ children }) => {
   // Join train tracking room
   const joinTrainTracking = (trainId) => {
     if (socket && isConnected) {
-      socket.emit('join-train-tracking', trainId);
+      socket.emit('subscribe_train_tracking', trainId);
       console.log(`Joined tracking room for train ${trainId}`);
     }
   };
@@ -80,7 +84,7 @@ export const SocketProvider = ({ children }) => {
   // Leave train tracking room
   const leaveTrainTracking = (trainId) => {
     if (socket && isConnected) {
-      socket.emit('leave-train-tracking', trainId);
+      socket.emit('unsubscribe_train_tracking', trainId);
       console.log(`Left tracking room for train ${trainId}`);
     }
   };

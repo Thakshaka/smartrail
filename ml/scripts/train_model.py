@@ -1,3 +1,57 @@
+import os
+import json
+import numpy as np
+import pandas as pd
+from datetime import datetime, timedelta
+
+def generate_synthetic_predictions(num_trains=3, stations_per_train=12):
+    """Generate a synthetic dataset for arrival predictions.
+    Produces rows with train_id, station_id, scheduled_time, features, and target predicted_time with noise.
+    """
+    rows = []
+    base_train_ids = list(range(1, num_trains + 1))
+    base_station_ids = list(range(100, 100 + stations_per_train))
+
+    for train_id in base_train_ids:
+        # Start at 06:00, each station +25 minutes
+        start = datetime.strptime('06:00:00', '%H:%M:%S')
+        for idx, station_id in enumerate(base_station_ids):
+            scheduled = start + timedelta(minutes=25 * idx)
+            # Features
+            hour = scheduled.hour
+            day_of_week = 2  # Wednesday
+            distance_km = 10 + 8 * idx
+            speed_kmh = 60 + np.random.randn() * 4
+            weather_factor = np.random.choice([0, 0.5, 1.0])
+            # Noise/delay in minutes
+            baseline_delay = max(0, np.random.normal(loc=2 + 0.02 * distance_km + 0.15 * weather_factor * 10, scale=2))
+            predicted_dt = scheduled + timedelta(minutes=baseline_delay)
+            rows.append({
+                'train_id': train_id,
+                'station_id': station_id,
+                'scheduled_time': scheduled.strftime('%H:%M:%S'),
+                'predicted_time': predicted_dt.strftime('%H:%M:%S'),
+                'hour': hour,
+                'day_of_week': day_of_week,
+                'distance_km': distance_km,
+                'speed_kmh': speed_kmh,
+                'weather_factor': weather_factor,
+                'delay_minutes': baseline_delay
+            })
+
+    df = pd.DataFrame(rows)
+    return df
+
+def save_synthetic_dataset(output_dir):
+    os.makedirs(output_dir, exist_ok=True)
+    df = generate_synthetic_predictions()
+    csv_path = os.path.join(output_dir, 'synthetic_predictions.csv')
+    df.to_csv(csv_path, index=False)
+    return csv_path
+
+if __name__ == '__main__':
+    out = save_synthetic_dataset(os.path.join(os.path.dirname(__file__), '..', 'data'))
+    print(f"Synthetic dataset saved to {out}")
 #!/usr/bin/env python3
 """
 SmartRail ML Model Training Script
@@ -23,7 +77,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('training.log'),
+        logging.FileHandler('training.log', encoding='utf-8'),
         logging.StreamHandler(sys.stdout)
     ]
 )
@@ -32,7 +86,7 @@ logger = logging.getLogger(__name__)
 def main():
     """Main training function"""
     try:
-        logger.info("🚂 Starting SmartRail ML model training...")
+        logger.info("Starting SmartRail ML model training...")
         
         # Initialize components
         model = PredictionModel()
@@ -40,7 +94,7 @@ def main():
         feature_engineer = FeatureEngineer()
         
         # Load training data
-        logger.info("📊 Loading training data...")
+        logger.info("Loading training data...")
         df = data_processor.load_training_data(days_back=90)
         
         if df.empty:
@@ -51,11 +105,11 @@ def main():
             logger.info(f"Loaded {len(df)} training records")
             
             # Preprocess data
-            logger.info("🔧 Preprocessing data...")
+            logger.info("Preprocessing data...")
             df_processed = data_processor.preprocess_data(df)
             
             # Extract features
-            logger.info("⚙️ Engineering features...")
+            logger.info("Engineering features...")
             features_list = []
             targets = []
             
@@ -105,53 +159,53 @@ def main():
         best_score = float('inf')
         
         for model_type in model_types:
-            logger.info(f"🤖 Training {model_type} model...")
+            logger.info(f"Training {model_type} model...")
             
             try:
                 result = model.train(X, y, model_type)
                 mae = result['metrics']['mae']
                 
-                logger.info(f"✅ {model_type} - MAE: {mae:.2f}, R²: {result['metrics']['r2']:.3f}")
+                logger.info(f"{model_type} - MAE: {mae:.2f}, R2: {result['metrics']['r2']:.3f}")
                 
                 if mae < best_score:
                     best_score = mae
                     best_model = model_type
                     
             except Exception as e:
-                logger.error(f"❌ Failed to train {model_type}: {e}")
+                logger.error(f"Failed to train {model_type}: {e}")
         
         # Train final model with best performing algorithm
         if best_model:
-            logger.info(f"🏆 Best model: {best_model} (MAE: {best_score:.2f})")
-            logger.info("🔄 Training final model...")
+            logger.info(f"Best model: {best_model} (MAE: {best_score:.2f})")
+            logger.info("Training final model...")
             
             final_result = model.train(X, y, best_model)
             
-            logger.info("💾 Saving trained model...")
+            logger.info("Saving trained model...")
             model.save_model()
             
             # Print final metrics
             metrics = final_result['metrics']
-            logger.info("📈 Final Model Performance:")
+            logger.info("Final Model Performance:")
             logger.info(f"   - Mean Absolute Error: {metrics['mae']:.2f} minutes")
             logger.info(f"   - Root Mean Square Error: {metrics['rmse']:.2f} minutes")
-            logger.info(f"   - R² Score: {metrics['r2']:.3f}")
+            logger.info(f"   - R2 Score: {metrics['r2']:.3f}")
             logger.info(f"   - Cross-validation MAE: {metrics['cv_mae']:.2f} ± {metrics['cv_std']:.2f}")
             
-            logger.info("🎉 Model training completed successfully!")
+            logger.info("Model training completed successfully!")
             
         else:
             logger.error("❌ No model could be trained successfully")
             sys.exit(1)
             
     except Exception as e:
-        logger.error(f"❌ Training failed: {e}")
+        logger.error(f"Training failed: {e}")
         sys.exit(1)
 
 def evaluate_model():
     """Evaluate the trained model"""
     try:
-        logger.info("📊 Evaluating model performance...")
+        logger.info("Evaluating model performance...")
         
         model = PredictionModel()
         if not model.load_model():
@@ -162,15 +216,15 @@ def evaluate_model():
         info = model.get_model_info()
         metrics = model.get_performance_metrics()
         
-        logger.info("📋 Model Information:")
+        logger.info("Model Information:")
         logger.info(f"   - Type: {info['model_type']}")
         logger.info(f"   - Version: {info['version']}")
         logger.info(f"   - Features: {info['feature_count']}")
         
-        logger.info("📈 Performance Metrics:")
+        logger.info("Performance Metrics:")
         logger.info(f"   - MAE: {metrics['mae']} minutes")
         logger.info(f"   - RMSE: {metrics['rmse']} minutes")
-        logger.info(f"   - R² Score: {metrics['r2_score']}")
+        logger.info(f"   - R2 Score: {metrics['r2_score']}")
         logger.info(f"   - Accuracy (±5min): {metrics['accuracy_within_5min']*100:.1f}%")
         logger.info(f"   - Accuracy (±10min): {metrics['accuracy_within_10min']*100:.1f}%")
         
