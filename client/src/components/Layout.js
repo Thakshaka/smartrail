@@ -98,7 +98,7 @@ const Layout = ({ children }) => {
   const drawer = (
     <Box sx={{ width: 280, height: '100%', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
       <Box sx={{ p: 3, textAlign: 'center', background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
-        <Box component="img" src="/logo.svg" alt="SmartRail" sx={{ height: 40, width: 40, mb: 1, filter: 'brightness(0) invert(1)' }} />
+        <Box component="img" src="/logo.png" alt="SmartRail" sx={{ height: 40, width: 40, mb: 1 }} />
         <Typography variant="h6" sx={{ color: 'white', fontWeight: 700, letterSpacing: '-0.02em' }}>
           SmartRail
         </Typography>
@@ -219,13 +219,11 @@ const Layout = ({ children }) => {
             >
               <Box 
                 component="img" 
-                src="/logo.svg" 
+                src="/logo.png" 
                 alt="SmartRail" 
                 sx={{ 
                   height: 40, 
-                  width: 40,
-                  filter: trigger ? 'none' : 'brightness(0) invert(1)',
-                  transition: 'all 0.2s ease-in-out'
+                  width: 40
                 }} 
               />
               <Typography 
@@ -449,7 +447,7 @@ const Layout = ({ children }) => {
         <Container maxWidth="lg">
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box component="img" src="/logo.svg" alt="SmartRail" sx={{ height: 24, width: 24, filter: 'brightness(0) invert(1)' }} />
+              <Box component="img" src="/logo.png" alt="SmartRail" sx={{ height: 24, width: 24 }} />
               <Typography variant="h6" sx={{ fontWeight: 700, letterSpacing: '-0.02em' }}>
                 SmartRail
               </Typography>
